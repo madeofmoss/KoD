@@ -1,0 +1,15 @@
+{
+  "name": "kingdom-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.13.0",
+    "quick.db": "^9.0.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
