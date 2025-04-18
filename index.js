@@ -227,14 +227,41 @@ const Player = sequelize.define('Player', {
   rerollsUsed: { type: DataTypes.INTEGER, defaultValue: 0 },
   lastAction: DataTypes.DATE,
   distanceToMarket: { type: DataTypes.INTEGER, defaultValue: 0 },
-  distanceToMountain: { type: DataTypes.INTEGER, defaultValue: 0 }
+  distanceToMountain: { type: DataTypes.INTEGER, defaultValue: 0 },
+  // New fields for kingdom-wide XP
+  farmerXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  farmerLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  warriorXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  warriorLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  monkXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  monkLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  merchantXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  merchantLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  hunterXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  hunterLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  inventorXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  inventorLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  architectXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  architectLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  medicXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  medicLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  smithXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  smithLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  entertainerXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  entertainerLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  rogueXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  rogueLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  minerXp: { type: DataTypes.INTEGER, defaultValue: 0 },
+  minerLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
+  // For consumable effects
+  trinketActive: { type: DataTypes.BOOLEAN, defaultValue: false },
+  beerActive: { type: DataTypes.BOOLEAN, defaultValue: false },
+  medicineActive: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, { timestamps: false });
 
 const Unit = sequelize.define('Unit', {
   unitId: { type: DataTypes.STRING, primaryKey: true },
   type: DataTypes.STRING,
-  level: { type: DataTypes.INTEGER, defaultValue: 1 },
-  xp: { type: DataTypes.INTEGER, defaultValue: 0 },
   combat: DataTypes.FLOAT,
   movement: DataTypes.INTEGER,
   position: { type: DataTypes.STRING, defaultValue: 'capital' },
@@ -350,13 +377,13 @@ async function processMovement() {
         unit.isTraveling = false;
         
         // Restore movement points
-        const levelData = SKILLS[unit.type].levels[unit.level - 1];
+        const player = await Player.findByPk(unit.PlayerId);
+        const levelData = SKILLS[unit.type].levels[player[`${unit.type.toLowerCase()}Level`] - 1];
         unit.movement = levelData.m;
         
         await unit.save();
         
         // Notify player
-        const player = await Player.findByPk(unit.PlayerId);
         if (player) {
           const user = await bot.users.fetch(player.playerId);
           if (user) {
@@ -370,7 +397,7 @@ async function processMovement() {
       }
       
       // Add XP for moving
-      await addXP(unit, 2);
+      await addXP(unit.PlayerId, unit.type, 2);
     }
   } catch (error) {
     console.error('Movement processing error:', error);
@@ -389,30 +416,34 @@ function getMovementCost(from, to, unitType) {
 }
 
 // =================
-// XP System
+// XP System (now kingdom-wide)
 // =================
-async function addXP(unit, amount) {
-  unit.xp += amount;
+async function addXP(playerId, skill, amount) {
+  const player = await Player.findByPk(playerId);
+  if (!player) return false;
   
-  // Check if unit should level up
-  if (unit.level < 6 && unit.xp >= XP_LEVELS[unit.level]) {
-    unit.level += 1;
-    unit.xp = 0;
+  const xpField = `${skill.toLowerCase()}Xp`;
+  const levelField = `${skill.toLowerCase()}Level`;
+  
+  player[xpField] += amount;
+  
+  // Check if skill should level up
+  if (player[levelField] < 6 && player[xpField] >= XP_LEVELS[player[levelField]]) {
+    player[levelField] += 1;
+    player[xpField] = 0;
     
-    // Update unit stats based on new level
-    const levelData = SKILLS[unit.type].levels[unit.level - 1];
-    unit.combat = levelData.c;
-    unit.movement = levelData.m;
+    await player.save();
     
-    if (levelData.visibilityThreshold !== undefined) {
-      unit.visibilityThreshold = levelData.visibilityThreshold;
+    // Notify player
+    const user = await bot.users.fetch(playerId);
+    if (user) {
+      user.send(`🥳 Level Up! Your ${skill} is now level ${player[levelField]} 📈`);
     }
     
-    await unit.save();
     return true; // Leveled up
   }
   
-  await unit.save();
+  await player.save();
   return false; // Didn't level up
 }
 
@@ -469,7 +500,11 @@ async function handleSetupCommand(message) {
   }
 }
 
-async function createUnit(playerId, unitType, level = 1) {
+async function createUnit(playerId, unitType) {
+  const player = await Player.findByPk(playerId);
+  if (!player) return null;
+  
+  const level = player[`${unitType.toLowerCase()}Level`];
   const skill = SKILLS[unitType];
   const levelData = skill.levels[level - 1];
   
@@ -477,7 +512,6 @@ async function createUnit(playerId, unitType, level = 1) {
     unitId: `unit_${Date.now()}`,
     PlayerId: playerId,
     type: unitType,
-    level,
     combat: levelData.c,
     movement: levelData.m,
     position: 'capital'
@@ -496,7 +530,7 @@ async function handleTrainCommand(message, args) {
     const player = await Player.findByPk(message.author.id);
     if (!player) return message.reply('Use !setup first');
 
-    const unitType = args[0]?.toLowerCase();
+    const unitType = args[0]?.charAt(0).toUpperCase() + args[0]?.slice(1).toLowerCase();
     if (!unitType || !SKILLS[unitType]) {
       return message.reply(`Invalid unit type. Available types: ${Object.keys(SKILLS).join(', ')}`);
     }
@@ -559,6 +593,104 @@ async function handleStatusCommand(message) {
   }
 }
 
+async function handleUnitsCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    if (player.Units.length === 0) {
+      return message.reply('You have no units yet. Use !train to create some.');
+    }
+
+    const unitList = player.Units.map(unit => {
+      let info = `${unit.unitId}: ${unit.type}${SKILLS[unit.type]?.emoji || ''} (Lvl ${player[`${unit.type.toLowerCase()}Level`]})`;
+      info += `\n- Combat: ${unit.combat.toFixed(2)} | Movement: ${unit.movement}`;
+      info += `\n- Position: ${unit.position}`;
+      if (unit.isTraveling) {
+        info += ` (Traveling to ${unit.destination}, ${unit.distanceTraveled}/${unit.totalDistance} spaces)`;
+      }
+      if (unit.equippedWeapon > 0) {
+        info += `\n- Weapon: +${unit.equippedWeapon.toFixed(2)} combat`;
+      }
+      if (unit.equippedArmor > 0) {
+        info += `\n- Armor: +${unit.equippedArmor.toFixed(2)} defense`;
+      }
+      return info;
+    }).join('\n\n');
+
+    const embed = new EmbedBuilder()
+      .setTitle(`${player.username}'s Units`)
+      .setDescription(unitList);
+
+    message.reply({ embeds: [embed] });
+  } catch (error) {
+    console.error('Units error:', error);
+    message.reply('Error fetching units');
+  }
+}
+
+async function handleInventoryCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    if (player.Inventories.length === 0) {
+      return message.reply('Your inventory is empty.');
+    }
+
+    const inventoryList = player.Inventories.map(item => {
+      let info = `${item.itemType}: ${item.quantity}`;
+      if (item.value > 0) {
+        info += ` (Value: ${item.value.toFixed(2)})`;
+      }
+      return info;
+    }).join('\n');
+
+    const embed = new EmbedBuilder()
+      .setTitle(`${player.username}'s Inventory`)
+      .setDescription(inventoryList)
+      .addFields(
+        { name: 'Active Effects', value: 
+          `Trinket Bonus: ${player.trinketActive ? 'Active (next production doubled)' : 'Inactive'}\n` +
+          `Beer Bonus: ${player.beerActive ? 'Active' : 'Inactive'}\n` +
+          `Medicine Bonus: ${player.medicineActive ? 'Active' : 'Inactive'}`
+        }
+      );
+
+    message.reply({ embeds: [embed] });
+  } catch (error) {
+    console.error('Inventory error:', error);
+    message.reply('Error fetching inventory');
+  }
+}
+
+async function handleLevelsCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id);
+    if (!player) return message.reply('Use !setup first');
+
+    const levelsList = Object.keys(SKILLS).map(skill => {
+      const level = player[`${skill.toLowerCase()}Level`];
+      const xp = player[`${skill.toLowerCase()}Xp`];
+      const nextLevelXP = level < 6 ? XP_LEVELS[level] : 'MAX';
+      return `${skill}${SKILLS[skill].emoji}: Level ${level} (${xp}/${nextLevelXP} XP)`;
+    }).join('\n');
+
+    const embed = new EmbedBuilder()
+      .setTitle(`${player.username}'s Skill Levels`)
+      .setDescription(levelsList);
+
+    message.reply({ embeds: [embed] });
+  } catch (error) {
+    console.error('Levels error:', error);
+    message.reply('Error fetching levels');
+  }
+}
+
 async function handleDailyUpdate() {
   try {
     const players = await Player.findAll();
@@ -617,7 +749,7 @@ async function handleFarmCommand(message) {
     
     if (!farmer) return message.reply('No available farmers (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Farmer.levels[farmer.level - 1];
+    const levelData = SKILLS.Farmer.levels[player.farmerLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -628,13 +760,19 @@ async function handleFarmCommand(message) {
       }
     }
 
+    // Check for trinket bonus
+    if (player.trinketActive && Math.random() < 0.5) {
+      produced *= 2;
+      await player.update({ trinketActive: false });
+    }
+
     if (produced > 0) {
       await player.update({ food: player.food + produced });
       message.reply(`Your farmer produced ${produced} food!`);
-      await addXP(farmer, 12); // XP for success
+      await addXP(player.playerId, 'Farmer', 12); // XP for success
     } else {
       message.reply('Your farmer worked hard but produced no food today.');
-      await addXP(farmer, 16); // More XP for failure
+      await addXP(player.playerId, 'Farmer', 16); // More XP for failure
     }
 
     farmer.lastAction = new Date();
@@ -661,7 +799,7 @@ async function handleHuntCommand(message) {
     
     if (!hunter) return message.reply('No available hunters (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Hunter.levels[hunter.level - 1];
+    const levelData = SKILLS.Hunter.levels[player.hunterLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -672,13 +810,19 @@ async function handleHuntCommand(message) {
       }
     }
 
+    // Check for trinket bonus
+    if (player.trinketActive && Math.random() < 0.5) {
+      produced *= 2;
+      await player.update({ trinketActive: false });
+    }
+
     if (produced > 0) {
       await player.update({ food: player.food + produced });
       message.reply(`Your hunter brought back ${produced} food!`);
-      await addXP(hunter, 12);
+      await addXP(player.playerId, 'Hunter', 12);
     } else {
       message.reply('Your hunter returned empty-handed today.');
-      await addXP(hunter, 16);
+      await addXP(player.playerId, 'Hunter', 16);
     }
 
     hunter.lastAction = new Date();
@@ -706,7 +850,7 @@ async function handleMineCommand(message) {
     
     if (!miner) return message.reply('No available miners on mountain spaces (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Miner.levels[miner.level - 1];
+    const levelData = SKILLS.Miner.levels[player.minerLevel - 1];
     const roll = Math.random() * 100;
     let producedOre = 0;
 
@@ -720,6 +864,13 @@ async function handleMineCommand(message) {
     let producedGem = 0;
     if (Math.random() * 100 < levelData.produce.special.chance) {
       producedGem = 1;
+    }
+
+    // Check for trinket bonus
+    if (player.trinketActive && Math.random() < 0.5) {
+      producedOre *= 2;
+      producedGem *= 2;
+      await player.update({ trinketActive: false });
     }
 
     if (producedOre > 0) {
@@ -738,9 +889,9 @@ async function handleMineCommand(message) {
     
     // Add XP based on results
     if (producedOre > 0 || producedGem > 0) {
-      await addXP(miner, 12);
+      await addXP(player.playerId, 'Miner', 12);
     } else {
-      await addXP(miner, 16);
+      await addXP(player.playerId, 'Miner', 16);
     }
     
     miner.lastAction = new Date();
@@ -772,7 +923,7 @@ async function handleSmithCommand(message, args) {
     
     if (!smith) return message.reply('No available smiths (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Smith.levels[smith.level - 1];
+    const levelData = SKILLS.Smith.levels[player.smithLevel - 1];
     
     const baseValue = getRandomFloat(levelData.produce.minValue, levelData.produce.maxValue);
     
@@ -803,7 +954,7 @@ async function handleSmithCommand(message, args) {
     }
     
     // Add XP for smithing
-    await addXP(smith, 12);
+    await addXP(player.playerId, 'Smith', 12);
     
     smith.lastAction = new Date();
     await smith.save();
@@ -831,7 +982,7 @@ async function handleInventCommand(message) {
     
     if (!inventor) return message.reply('No available inventors (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Inventor.levels[inventor.level - 1];
+    const levelData = SKILLS.Inventor.levels[player.inventorLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -845,10 +996,10 @@ async function handleInventCommand(message) {
     if (produced > 0) {
       await addToInventory(player.playerId, 'trinket', produced);
       message.reply(`Your inventor created ${produced} trinket(s)!`);
-      await addXP(inventor, 12);
+      await addXP(player.playerId, 'Inventor', 12);
     } else {
       message.reply('Your inventor failed to create anything this time.');
-      await addXP(inventor, 16);
+      await addXP(player.playerId, 'Inventor', 16);
     }
 
     inventor.lastAction = new Date();
@@ -875,7 +1026,7 @@ async function handleMonkCommand(message) {
     
     if (!monk) return message.reply('No available monks (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Monk.levels[monk.level - 1];
+    const levelData = SKILLS.Monk.levels[player.monkLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -889,10 +1040,10 @@ async function handleMonkCommand(message) {
     if (produced > 0) {
       await addToInventory(player.playerId, 'beer_barrel', produced);
       message.reply(`Your monk brewed ${produced} beer barrel(s)!`);
-      await addXP(monk, 12);
+      await addXP(player.playerId, 'Monk', 12);
     } else {
       message.reply('Your monk failed to brew anything this time.');
-      await addXP(monk, 16);
+      await addXP(player.playerId, 'Monk', 16);
     }
 
     monk.lastAction = new Date();
@@ -920,7 +1071,7 @@ async function handleMerchantCommand(message) {
     
     if (!merchant) return message.reply('No available merchants at market (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Merchant.levels[merchant.level - 1];
+    const levelData = SKILLS.Merchant.levels[player.merchantLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -934,10 +1085,10 @@ async function handleMerchantCommand(message) {
     if (produced > 0) {
       await player.update({ gold: player.gold + produced });
       message.reply(`Your merchant earned ${produced} gold!`);
-      await addXP(merchant, 12);
+      await addXP(player.playerId, 'Merchant', 12);
     } else {
       message.reply('Your merchant failed to earn anything this time.');
-      await addXP(merchant, 16);
+      await addXP(player.playerId, 'Merchant', 16);
     }
 
     merchant.lastAction = new Date();
@@ -964,7 +1115,7 @@ async function handleEntertainCommand(message) {
     
     if (!entertainer) return message.reply('No available entertainers (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Entertainer.levels[entertainer.level - 1];
+    const levelData = SKILLS.Entertainer.levels[player.entertainerLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -978,10 +1129,10 @@ async function handleEntertainCommand(message) {
     if (produced > 0) {
       await addToInventory(player.playerId, 'art', produced);
       message.reply(`Your entertainer created ${produced} piece(s) of art!`);
-      await addXP(entertainer, 12);
+      await addXP(player.playerId, 'Entertainer', 12);
     } else {
       message.reply('Your entertainer failed to create anything this time.');
-      await addXP(entertainer, 16);
+      await addXP(player.playerId, 'Entertainer', 16);
     }
 
     entertainer.lastAction = new Date();
@@ -1008,7 +1159,7 @@ async function handleMedicCommand(message) {
     
     if (!medic) return message.reply('No available medics (must wait 5 minutes between actions or unit is traveling)');
 
-    const levelData = SKILLS.Medic.levels[medic.level - 1];
+    const levelData = SKILLS.Medic.levels[player.medicLevel - 1];
     const roll = Math.random() * 100;
     let produced = 0;
 
@@ -1022,10 +1173,10 @@ async function handleMedicCommand(message) {
     if (produced > 0) {
       await addToInventory(player.playerId, 'medicine', produced);
       message.reply(`Your medic produced ${produced} medicine(s)!`);
-      await addXP(medic, 12);
+      await addXP(player.playerId, 'Medic', 12);
     } else {
       message.reply('Your medic failed to produce anything this time.');
-      await addXP(medic, 16);
+      await addXP(player.playerId, 'Medic', 16);
     }
 
     medic.lastAction = new Date();
@@ -1033,6 +1184,130 @@ async function handleMedicCommand(message) {
   } catch (error) {
     console.error('Medic error:', error);
     message.reply('Error processing medic command');
+  }
+}
+
+// =================
+// Item Commands
+// =================
+async function handleItemCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const itemType = args[0]?.toLowerCase();
+    if (!itemType) return message.reply('Specify an item to use (trinket, beer_barrel, art, medicine)');
+
+    const item = player.Inventories.find(i => i.itemType === itemType);
+    if (!item || item.quantity < 1) {
+      return message.reply(`You don't have any ${itemType} to use`);
+    }
+
+    let effect = '';
+    switch(itemType) {
+      case 'trinket':
+        await player.update({ trinketActive: true });
+        effect = 'Your next production attempt has a 50% chance to produce double!';
+        break;
+      case 'beer_barrel':
+        await player.update({ beerActive: true });
+        effect = 'Your units gain +1 movement for their next action!';
+        break;
+      case 'art':
+        if (Math.random() < 0.5) {
+          await player.update({ mood: Math.min(5, player.mood + 1) });
+          effect = 'The art improved your kingdom\'s mood by 1!';
+        } else {
+          effect = 'The art had no effect on your kingdom\'s mood.';
+        }
+        break;
+      case 'medicine':
+        await player.update({ medicineActive: true });
+        effect = 'Your units will heal 1 HP after their next battle!';
+        break;
+      default:
+        return message.reply('This item cannot be used directly');
+    }
+
+    await removeFromInventory(player.playerId, itemType, 1);
+    message.reply(`Used 1 ${itemType}. ${effect}`);
+  } catch (error) {
+    console.error('Item error:', error);
+    message.reply('Error using item');
+  }
+}
+
+async function handleEquipCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const unitId = args[0];
+    if (!unitId) return message.reply('Specify a unit ID to equip. Use !units to see your units.');
+
+    const unit = player.Units.find(u => u.unitId === unitId);
+    if (!unit) return message.reply('Unit not found');
+
+    const equipType = args[1]?.toLowerCase();
+    if (!equipType || !['weapon', 'armor'].includes(equipType)) {
+      return message.reply('Specify "weapon" or "armor" to equip');
+    }
+
+    const items = player.Inventories.filter(i => i.itemType === equipType);
+    if (items.length === 0) {
+      return message.reply(`You don't have any ${equipType}s to equip`);
+    }
+
+    // List available items
+    let itemList = items.map((item, index) => 
+      `${index + 1}. ${item.itemType} (Value: ${item.value.toFixed(2)})`
+    ).join('\n');
+
+    await message.reply(`Which ${equipType} would you like to equip?\n${itemList}\n\nReply with the number or "cancel"`);
+
+    // Wait for user response
+    const filter = m => m.author.id === message.author.id;
+    const collected = await message.channel.awaitMessages({
+      filter,
+      max: 1,
+      time: 30000,
+      errors: ['time']
+    });
+    
+    const response = collected.first().content.toLowerCase();
+    if (response === 'cancel') {
+      return message.reply('Equip canceled.');
+    }
+
+    const choice = parseInt(response) - 1;
+    if (isNaN(choice) {
+      return message.reply('Invalid choice. Please enter a number.');
+    }
+
+    if (choice < 0 || choice >= items.length) {
+      return message.reply('Invalid item selection.');
+    }
+
+    const selectedItem = items[choice];
+    
+    // Equip the item
+    if (equipType === 'weapon') {
+      unit.equippedWeapon = selectedItem.value;
+      message.reply(`Equipped weapon with +${selectedItem.value.toFixed(2)} combat to your ${unit.type}!`);
+    } else {
+      unit.equippedArmor = selectedItem.value;
+      message.reply(`Equipped armor with +${selectedItem.value.toFixed(2)} defense to your ${unit.type}!`);
+    }
+    
+    await unit.save();
+    await removeFromInventory(player.playerId, equipType, 1);
+  } catch (error) {
+    console.error('Equip error:', error);
+    message.reply('Error processing equip command');
   }
 }
 
@@ -1108,7 +1383,7 @@ async function handleMoveCommand(message, args) {
     message.reply(`Your ${unit.type} is now traveling to ${destination}. ETA: ${minutes} minute(s)`);
     
     // Add XP for starting movement
-    await addXP(unit, 2);
+    await addXP(player.playerId, unit.type, 2);
   } catch (error) {
     console.error('Move error:', error);
     message.reply('Error processing move command');
@@ -1208,10 +1483,7 @@ async function handleBuyCommand(message, args) {
       return message.reply(`Not enough gold. You need ${price}g but only have ${player.gold}g`);
     }
 
-    const merchantLevel = player.Units
-      .filter(u => u.type === 'Merchant')
-      .reduce((max, u) => Math.max(max, u.level), 0);
-    
+    const merchantLevel = player.merchantLevel;
     const discount = merchantLevel * 0.05;
     const finalPrice = Math.floor(price * (1 - discount));
 
@@ -1251,10 +1523,7 @@ async function handleSellCommand(message, args) {
       ? MARKET_PRICES[item].sell(inventoryItem.value) * quantity 
       : MARKET_PRICES[item].sell * quantity;
 
-    const merchantLevel = player.Units
-      .filter(u => u.type === 'Merchant')
-      .reduce((max, u) => Math.max(max, u.level), 0);
-    
+    const merchantLevel = player.merchantLevel;
     const discount = merchantLevel * 0.05;
     const finalPrice = Math.floor(price * (1 + discount)); // Bonus when selling
 
@@ -1311,8 +1580,10 @@ async function handleAttackCommand(message, args) {
       if (!targetUnit) return message.reply('Target unit not found in your location');
       targetPlayer = targetUnit.Player;
       
-      // Calculate damage
-      damage = Math.max(1, attacker.combat - (targetUnit.combat / 2));
+      // Calculate damage (including weapon bonus)
+      const attackerCombat = attacker.combat + (attacker.equippedWeapon || 0);
+      const defenderCombat = targetUnit.combat + (targetUnit.equippedWeapon || 0);
+      damage = Math.max(1, attackerCombat - (defenderCombat / 2));
       
       // Apply damage
       targetUnit.combat -= damage;
@@ -1335,7 +1606,8 @@ async function handleAttackCommand(message, args) {
       if (!targetPlayer) return message.reply('Target kingdom not found');
       
       // Calculate mood damage (1 mood per 5 combat)
-      damage = Math.floor(attacker.combat / 5);
+      const attackerCombat = attacker.combat + (attacker.equippedWeapon || 0);
+      damage = Math.floor(attackerCombat / 5);
       if (damage < 1) damage = 1;
       
       await targetPlayer.update({ 
@@ -1351,7 +1623,7 @@ async function handleAttackCommand(message, args) {
     await attacker.save();
     
     // Add XP for attacking
-    await addXP(attacker, 15);
+    await addXP(player.playerId, attacker.type, 15);
   } catch (error) {
     console.error('Attack error:', error);
     message.reply('Error processing attack command');
@@ -1404,6 +1676,9 @@ bot.on('messageCreate', async message => {
   try {
     if (command === 'setup') await handleSetupCommand(message);
     else if (command === 'status') await handleStatusCommand(message);
+    else if (command === 'units') await handleUnitsCommand(message);
+    else if (command === 'inventory') await handleInventoryCommand(message);
+    else if (command === 'levels') await handleLevelsCommand(message);
     else if (command === 'train') await handleTrainCommand(message, args);
     else if (command === 'farm') await handleFarmCommand(message);
     else if (command === 'hunt') await handleHuntCommand(message);
@@ -1418,12 +1693,17 @@ bot.on('messageCreate', async message => {
     else if (command === 'sell') await handleSellCommand(message, args);
     else if (command === 'move') await handleMoveCommand(message, args);
     else if (command === 'attack') await handleAttackCommand(message, args);
+    else if (command === 'item') await handleItemCommand(message, args);
+    else if (command === 'equip') await handleEquipCommand(message, args);
     else if (command === 'yesireallywanttoresetmykingdom') await handleResetCommand(message);
     else if (command === 'commands') {
       message.reply(`
 Available commands:
 !setup - Create your kingdom
 !status - View your kingdom status
+!units - List all your units with details
+!inventory - View your detailed inventory
+!levels - View your skill levels and XP
 !train <type> - Train a new unit (costs 1 food)
 !farm - Have a farmer produce food
 !hunt - Have a hunter produce food
@@ -1438,6 +1718,8 @@ Available commands:
 !sell <item> [quantity] - Sell to market
 !move <unitId> <destination> - Move unit (market/mountain/capital)
 !attack <unitId> <unit|kingdom> <targetId> - Attack
+!item <item> - Use an item (trinket, beer_barrel, art, medicine)
+!equip <unitId> <weapon|armor> - Equip items to units
 !YesIReallyWantToResetMyKingdom - Reset kingdom
       `);
     }
