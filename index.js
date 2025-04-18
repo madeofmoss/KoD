@@ -11,12 +11,29 @@ const bot = new Client({
 // ======================
 // Database Configuration
 // ======================
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+const databaseConfig = {
+  host: process.env.RAILWAY_PRIVATE_DOMAIN || 'localhost',
+  port: process.env.RAILWAY_PRIVATE_PORT || 5432,
+  username: process.env.RAILWAY_DB_USERNAME || 'postgres',
+  password: process.env.RAILWAY_DB_PASSWORD,
+  database: process.env.RAILWAY_DB_NAME || 'railway'
+};
+
+const sequelize = new Sequelize({
   dialect: 'postgres',
+  ...databaseConfig,
+  dialectOptions: {
+    ssl: process.env.RAILWAY_ENVIRONMENT === 'production' ? {
+      require: true,
+      rejectUnauthorized: false
+    } : false
+  },
   logging: false
 });
 
-// Define Models
+// =====================
+// Database Models
+// =====================
 const Player = sequelize.define('Player', {
   playerId: { type: DataTypes.STRING, primaryKey: true },
   username: DataTypes.STRING,
@@ -46,19 +63,25 @@ const Inventory = sequelize.define('Inventory', {
 });
 
 // Set up relationships
-Player.hasMany(Unit);
-Player.hasMany(Inventory);
+Player.hasMany(Unit, { foreignKey: 'PlayerId' });
+Player.hasMany(Inventory, { foreignKey: 'PlayerId' });
 Unit.belongsTo(Player);
 Inventory.belongsTo(Player);
 
-// Initialize Database
+// ======================
+// Database Initialization
+// ======================
 async function initDatabase() {
   try {
     await sequelize.authenticate();
+    console.log('Database connection established');
+    
+    // Sync all models
     await sequelize.sync({ alter: true });
-    console.log('Database connected!');
+    console.log('Database models synchronized');
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('Database initialization failed:', error);
+    process.exit(1);
   }
 }
 
@@ -75,6 +98,17 @@ function getRandomSkill() {
   return skills[Math.floor(Math.random() * skills.length)];
 }
 
+function getCombatValue(unitType, level) {
+  const baseValues = {
+    Farmer: 1,
+    Warrior: 2 + level,
+    Merchant: 1,
+    Hunter: 1 + Math.floor(level/2),
+    Medic: 1
+  };
+  return baseValues[unitType] || 1;
+}
+
 // =================
 // Command Handlers
 // =================
@@ -83,13 +117,32 @@ async function handleSetupCommand(message) {
     const existingPlayer = await Player.findByPk(message.author.id);
     if (existingPlayer) return message.reply('You already have a kingdom!');
 
+    const playerCount = await Player.count();
+    
     await Player.create({
       playerId: message.author.id,
       username: message.author.username,
       race: getRandomRace(),
       skill1: getRandomSkill(),
       skill2: getRandomSkill(),
-      turnOrder: await Player.count() + 1
+      turnOrder: playerCount + 1
+    });
+
+    // Create starting units
+    await Unit.create({
+      unitId: `unit_${Date.now()}_1`,
+      PlayerId: message.author.id,
+      type: getRandomSkill(),
+      combat: 1,
+      movement: 5
+    });
+
+    await Unit.create({
+      unitId: `unit_${Date.now()}_2`,
+      PlayerId: message.author.id,
+      type: getRandomSkill(),
+      combat: 1,
+      movement: 5
     });
 
     message.reply('Kingdom created! Use !status to view your kingdom.');
@@ -147,4 +200,5 @@ bot.on('messageCreate', async message => {
 
 bot.login(process.env.TOKEN).catch(error => {
   console.error('Login failed:', error);
+  process.exit(1);
 });
