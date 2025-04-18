@@ -54,27 +54,48 @@ const SKILLS = {
       { c: 1, m: 9, produce: { item: 'food', chances: [[1,85],[2,15]] } }
     ]
   },
-  Miner: {
-    emoji: '⛏',
+  Warrior: {
+    emoji: '🤺',
     levels: [
-      { c: 1, m: 6, produce: { item: 'ore', chances: [[0,50],[1,45],[2,5]], special: { item: 'gem', chance: 5 } } },
-      { c: 1, m: 6, produce: { item: 'ore', chances: [[0,40],[1,55],[2,5]], special: { item: 'gem', chance: 5 } } },
-      { c: 1, m: 7, produce: { item: 'ore', chances: [[0,30],[1,65],[2,5]], special: { item: 'gem', chance: 5 } } },
-      { c: 2, m: 8, produce: { item: 'ore', chances: [[0,20],[1,75],[2,5]], special: { item: 'gem', chance: 5 } } },
-      { c: 2, m: 9, produce: { item: 'ore', chances: [[0,10],[1,80],[2,10]], special: { item: 'gem', chance: 10 } } },
-      { c: 3, m: 9, produce: { item: 'ore', chances: [[1,85],[2,15]], special: { item: 'gem', chance: 15 } } }
-    ],
-    requires: 'mountain'
+      { c: 2, m: 5 },
+      { c: 3, m: 6 },
+      { c: 4, m: 7 },
+      { c: 5, m: 8 },
+      { c: 6, m: 9 },
+      { c: 7, m: 9 }
+    ]
   },
-  Smith: {
-    emoji: '⚒',
+  Monk: {
+    emoji: '🙌',
     levels: [
-      { c: 1, m: 4, produce: { item: 'weapon', minValue: 0.8, maxValue: 1.2 } },
-      { c: 1, m: 5, produce: { item: 'weapon', minValue: 1.8, maxValue: 2.2 } },
-      { c: 2, m: 5, produce: { item: 'weapon', minValue: 2.8, maxValue: 3.2 } },
-      { c: 2, m: 6, produce: { item: 'weapon', minValue: 3.8, maxValue: 4.2 } },
-      { c: 3, m: 7, produce: { item: 'weapon', minValue: 4.8, maxValue: 5.2 } },
-      { c: 3, m: 8, produce: { item: 'weapon', minValue: 5.8, maxValue: 6.2 } }
+      { c: 1, m: 7, produce: { item: 'beer_barrel', chances: [[0,20],[1,75],[2,5]] } },
+      { c: 1, m: 7, produce: { item: 'beer_barrel', chances: [[0,20],[1,75],[2,5]] } },
+      { c: 1, m: 8, produce: { item: 'beer_barrel', chances: [[0,20],[1,75],[2,5]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,15],[1,80],[2,5]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,15],[1,80],[2,5]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,15],[1,80],[2,5]] } }
+    ]
+  },
+  Merchant: {
+    emoji: '💰',
+    levels: [
+      { c: 1, m: 5, produce: { item: 'gold', chances: [[3,20],[6,60],[10,20]] } },
+      { c: 1, m: 7, produce: { item: 'gold', chances: [[4,20],[8,60],[12,20]] } },
+      { c: 1, m: 8, produce: { item: 'gold', chances: [[5,20],[10,60],[14,20]] } },
+      { c: 1, m: 9, produce: { item: 'gold', chances: [[6,20],[12,60],[16,20]] } },
+      { c: 1, m: 10, produce: { item: 'gold', chances: [[7,20],[14,60],[18,20]] } },
+      { c: 1, m: 11, produce: { item: 'gold', chances: [[8,20],[16,60],[20,20]] } }
+    ]
+  },
+  Hunter: {
+    emoji: '🐺',
+    levels: [
+      { c: 1, m: 7, produce: { item: 'food', chances: [[0,35],[1,60],[2,5]] } },
+      { c: 1, m: 7, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
+      { c: 3, m: 8, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
+      { c: 4, m: 9, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
+      { c: 4, m: 9, produce: { item: 'food', chances: [[0,25],[1,65],[2,10]] } },
+      { c: 4, m: 10, produce: { item: 'food', chances: [[0,20],[1,70],[2,15]] } }
     ]
   },
   Inventor: {
@@ -87,6 +108,73 @@ const SKILLS = {
       { c: 1, m: 5, produce: { item: 'trinket', chances: [[1,80],[2,20]] } },
       { c: 1, m: 6, produce: { item: 'trinket', chances: [[1,80],[2,10],[3,10]] } }
     ]
+  },
+  Architect: {
+    emoji: '🏛',
+    levels: [
+      { c: 1, m: 5 },
+      { c: 1, m: 6 },
+      { c: 1, m: 7 },
+      { c: 1, m: 8 },
+      { c: 1, m: 8, produce: { item: 'trinket', chances: [[0,40],[1,60]] } },
+      { c: 1, m: 8, produce: { item: 'trinket', chances: [[0,30],[1,60],[2,10]] } }
+    ]
+  },
+  Medic: {
+    emoji: '💊',
+    levels: [
+      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,20],[1,70],[2,10]] } },
+      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,20],[1,65],[2,15]] } },
+      { c: 1, m: 6, produce: { item: 'medicine', chances: [[0,15],[1,70],[2,15]] } },
+      { c: 1, m: 7, produce: { item: 'medicine', chances: [[0,10],[1,75],[2,15]] } },
+      { c: 1, m: 8, produce: { item: 'medicine', chances: [[0,5],[1,80],[2,15]] } },
+      { c: 1, m: 8, produce: { item: 'medicine', chances: [[1,80],[2,20]] } }
+    ]
+  },
+  Smith: {
+    emoji: '⚒',
+    levels: [
+      { c: 1, m: 4, produce: { item: 'weapon', minValue: 0.8, maxValue: 1.2 } },
+      { c: 1, m: 5, produce: { item: 'weapon', minValue: 1.8, maxValue: 2.2 } },
+      { c: 2, m: 5, produce: { item: 'weapon', minValue: 2.8, maxValue: 3.2 } },
+      { c: 2, m: 6, produce: { item: 'weapon', minValue: 3.8, maxValue: 4.2 } },
+      { c: 3, m: 7, produce: { item: 'weapon', minValue: 4.8, maxValue: 5.2 } },
+      { c: 3, m: 8, produce: { item: 'weapon', minValue: 5.8, maxValue: 6.2 } }
+    ]
+  },
+  Entertainer: {
+    emoji: '🎻',
+    levels: [
+      { c: 1, m: 5, produce: { item: 'art', chances: [[0,20],[1,70],[2,10]] } },
+      { c: 1, m: 6, produce: { item: 'art', chances: [[0,15],[1,70],[2,15]] } },
+      { c: 1, m: 7, produce: { item: 'art', chances: [[0,10],[1,70],[2,20]] } },
+      { c: 1, m: 8, produce: { item: 'art', chances: [[0,5],[1,70],[2,25]] } },
+      { c: 1, m: 9, produce: { item: 'art', chances: [[1,75],[2,25]] } },
+      { c: 1, m: 10, produce: { item: 'art', chances: [[1,70],[2,30]] } }
+    ]
+  },
+  Rogue: {
+    emoji: '🎭',
+    levels: [
+      { c: 1, m: 5, visibilityThreshold: 1 },
+      { c: 1, m: 6, visibilityThreshold: 2 },
+      { c: 2, m: 7, visibilityThreshold: 2 },
+      { c: 2, m: 8, visibilityThreshold: 2 },
+      { c: 3, m: 9, visibilityThreshold: 3 },
+      { c: 3, m: 10, visibilityThreshold: 3 }
+    ]
+  },
+  Miner: {
+    emoji: '⛏',
+    levels: [
+      { c: 1, m: 6, produce: { item: 'ore', chances: [[0,50],[1,45],[2,5]], special: { item: 'gem', chance: 5 } } },
+      { c: 1, m: 6, produce: { item: 'ore', chances: [[0,40],[1,55],[2,5]], special: { item: 'gem', chance: 5 } } },
+      { c: 1, m: 7, produce: { item: 'ore', chances: [[0,30],[1,65],[2,5]], special: { item: 'gem', chance: 5 } } },
+      { c: 2, m: 8, produce: { item: 'ore', chances: [[0,20],[1,75],[2,5]], special: { item: 'gem', chance: 5 } } },
+      { c: 2, m: 9, produce: { item: 'ore', chances: [[0,10],[1,80],[2,10]], special: { item: 'gem', chance: 10 } } },
+      { c: 3, m: 9, produce: { item: 'ore', chances: [[0,5],[1,80],[2,15]], special: { item: 'gem', chance: 15 } } }
+    ],
+    requires: 'mountain'
   }
 };
 
@@ -97,7 +185,10 @@ const MARKET_PRICES = {
   gem: { buy: 30, sell: 10 },
   medkit: { buy: 10, sell: 3 },
   trinket: { buy: 12, sell: 4 },
-  weapon: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) }
+  weapon: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) },
+  beer_barrel: { buy: 15, sell: 5 },
+  art: { buy: 20, sell: 6 },
+  medicine: { buy: 25, sell: 8 }
 };
 
 const MONTHS = [
@@ -110,7 +201,10 @@ const MONTHS = [
 const EVENTS = [
   { name: 'Sky Terror', description: 'A Quetzacoatl has been seen in the southeast' },
   { name: 'Crustacean Fury 🦀', description: 'Gigantic crabs ravage the coastlines' },
-  { name: 'Moving Shadows 👥', description: 'Stories of shadows lurking and whispering' }
+  { name: 'Moving Shadows 👥', description: 'Stories of shadows lurking and whispering' },
+  { name: 'Darvu Raiders', description: 'Bandits make themselves feel at home in Discordia' },
+  { name: 'Pilgrims', description: 'Citizens make a pilgrimage to Discordia' },
+  { name: 'Void Gate 🌌', description: 'Word has spread of a Gate to the Void in the Southeast' }
 ];
 
 // =====================
@@ -135,12 +229,14 @@ const Unit = sequelize.define('Unit', {
   unitId: { type: DataTypes.STRING, primaryKey: true },
   type: DataTypes.STRING,
   level: { type: DataTypes.INTEGER, defaultValue: 1 },
+  xp: { type: DataTypes.INTEGER, defaultValue: 0 },
   combat: DataTypes.FLOAT,
   movement: DataTypes.INTEGER,
   position: { type: DataTypes.STRING, defaultValue: 'capital' },
   lastAction: DataTypes.DATE,
   equippedWeapon: DataTypes.FLOAT,
-  equippedArmor: DataTypes.FLOAT
+  equippedArmor: DataTypes.FLOAT,
+  visibilityThreshold: { type: DataTypes.INTEGER, defaultValue: 0 }
 }, { timestamps: false });
 
 const Inventory = sequelize.define('Inventory', {
@@ -217,6 +313,10 @@ function getRandomFloat(min, max, decimals = 8) {
   return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
 }
 
+function calculateXPForLevel(level) {
+  return Math.floor(100 * Math.pow(1.5, level - 1));
+}
+
 // =================
 // Command Handlers
 // =================
@@ -269,7 +369,7 @@ async function createUnit(playerId, unitType, level = 1) {
   const skill = SKILLS[unitType];
   const levelData = skill.levels[level - 1];
   
-  return await Unit.create({
+  const unit = await Unit.create({
     unitId: `unit_${Date.now()}`,
     PlayerId: playerId,
     type: unitType,
@@ -278,6 +378,13 @@ async function createUnit(playerId, unitType, level = 1) {
     movement: levelData.m,
     position: 'capital'
   });
+
+  if (levelData.visibilityThreshold !== undefined) {
+    unit.visibilityThreshold = levelData.visibilityThreshold;
+    await unit.save();
+  }
+
+  return unit;
 }
 
 async function handleStatusCommand(message) {
@@ -389,6 +496,11 @@ async function handleFarmCommand(message) {
       }
 
       totalFood += produced;
+      
+      // Add XP based on production
+      const xpGain = produced > 0 ? 10 : 15; // More XP for failure
+      await addXP(farmer, xpGain);
+      
       farmer.lastAction = new Date();
       await farmer.save();
     }
@@ -402,6 +514,51 @@ async function handleFarmCommand(message) {
   } catch (error) {
     console.error('Farm error:', error);
     message.reply('Error processing farm command');
+  }
+}
+
+async function handleHuntCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const hunters = player.Units.filter(u => u.type === 'Hunter' && (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000));
+    if (hunters.length === 0) return message.reply('No available hunters (must wait 5 minutes between actions)');
+
+    let totalFood = 0;
+    for (const hunter of hunters) {
+      const levelData = SKILLS.Hunter.levels[hunter.level - 1];
+      const roll = Math.random() * 100;
+      let produced = 0;
+
+      for (const [amount, chance] of levelData.produce.chances) {
+        if (roll <= chance) {
+          produced = amount;
+          break;
+        }
+      }
+
+      totalFood += produced;
+      
+      // Add XP based on production
+      const xpGain = produced > 0 ? 10 : 15; // More XP for failure
+      await addXP(hunter, xpGain);
+      
+      hunter.lastAction = new Date();
+      await hunter.save();
+    }
+
+    if (totalFood > 0) {
+      await player.update({ food: player.food + totalFood });
+      message.reply(`Your hunters brought back ${totalFood} food!`);
+    } else {
+      message.reply('Your hunters returned empty-handed today.');
+    }
+  } catch (error) {
+    console.error('Hunt error:', error);
+    message.reply('Error processing hunt command');
   }
 }
 
@@ -441,6 +598,11 @@ async function handleMineCommand(message) {
 
       totalOre += producedOre;
       totalGems += producedGem;
+      
+      // Add XP based on production
+      const xpGain = (producedOre > 0 || producedGem > 0) ? 10 : 15;
+      await addXP(miner, xpGain);
+      
       miner.lastAction = new Date();
       await miner.save();
     }
@@ -514,6 +676,9 @@ async function handleSmithCommand(message, args) {
       await removeFromInventory(player.playerId, 'gem', gemsUsed);
     }
     
+    // Add XP for smithing
+    await addXP(smith, 20);
+    
     smith.lastAction = new Date();
     await smith.save();
     
@@ -557,12 +722,278 @@ async function handleInventCommand(message) {
       message.reply('Your inventor failed to create anything this time.');
     }
 
+    // Add XP based on production
+    const xpGain = produced > 0 ? 10 : 15;
+    await addXP(inventor, xpGain);
+    
     inventor.lastAction = new Date();
     await inventor.save();
   } catch (error) {
     console.error('Invent error:', error);
     message.reply('Error processing invent command');
   }
+}
+
+async function handleMonkCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const monks = player.Units.filter(u => 
+      u.type === 'Monk' && 
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000)
+    );
+    
+    if (monks.length === 0) return message.reply('No available monks (must wait 5 minutes between actions)');
+
+    const monk = monks[0];
+    const levelData = SKILLS.Monk.levels[monk.level - 1];
+    const roll = Math.random() * 100;
+    let produced = 0;
+
+    for (const [amount, chance] of levelData.produce.chances) {
+      if (roll <= chance) {
+        produced = amount;
+        break;
+      }
+    }
+
+    if (produced > 0) {
+      await addToInventory(player.playerId, 'beer_barrel', produced);
+      message.reply(`Your monks brewed ${produced} beer barrel(s)!`);
+    } else {
+      message.reply('Your monks failed to brew anything this time.');
+    }
+
+    // Add XP based on production
+    const xpGain = produced > 0 ? 10 : 15;
+    await addXP(monk, xpGain);
+    
+    monk.lastAction = new Date();
+    await monk.save();
+  } catch (error) {
+    console.error('Monk error:', error);
+    message.reply('Error processing monk command');
+  }
+}
+
+async function handleMerchantCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const merchants = player.Units.filter(u => 
+      u.type === 'Merchant' && 
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000)
+    );
+    
+    if (merchants.length === 0) return message.reply('No available merchants (must wait 5 minutes between actions)');
+
+    const merchant = merchants[0];
+    const levelData = SKILLS.Merchant.levels[merchant.level - 1];
+    const roll = Math.random() * 100;
+    let produced = 0;
+
+    for (const [amount, chance] of levelData.produce.chances) {
+      if (roll <= chance) {
+        produced = amount;
+        break;
+      }
+    }
+
+    if (produced > 0) {
+      await player.update({ gold: player.gold + produced });
+      message.reply(`Your merchant earned ${produced} gold!`);
+    } else {
+      message.reply('Your merchant failed to earn anything this time.');
+    }
+
+    // Add XP based on production
+    const xpGain = produced > 0 ? 10 : 15;
+    await addXP(merchant, xpGain);
+    
+    merchant.lastAction = new Date();
+    await merchant.save();
+  } catch (error) {
+    console.error('Merchant error:', error);
+    message.reply('Error processing merchant command');
+  }
+}
+
+async function handleEntertainCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const entertainers = player.Units.filter(u => 
+      u.type === 'Entertainer' && 
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000)
+    );
+    
+    if (entertainers.length === 0) return message.reply('No available entertainers (must wait 5 minutes between actions)');
+
+    const entertainer = entertainers[0];
+    const levelData = SKILLS.Entertainer.levels[entertainer.level - 1];
+    const roll = Math.random() * 100;
+    let produced = 0;
+
+    for (const [amount, chance] of levelData.produce.chances) {
+      if (roll <= chance) {
+        produced = amount;
+        break;
+      }
+    }
+
+    if (produced > 0) {
+      await addToInventory(player.playerId, 'art', produced);
+      message.reply(`Your entertainer created ${produced} piece(s) of art!`);
+    } else {
+      message.reply('Your entertainer failed to create anything this time.');
+    }
+
+    // Add XP based on production
+    const xpGain = produced > 0 ? 10 : 15;
+    await addXP(entertainer, xpGain);
+    
+    entertainer.lastAction = new Date();
+    await entertainer.save();
+  } catch (error) {
+    console.error('Entertain error:', error);
+    message.reply('Error processing entertain command');
+  }
+}
+
+async function handleMedicCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const medics = player.Units.filter(u => 
+      u.type === 'Medic' && 
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000)
+    );
+    
+    if (medics.length === 0) return message.reply('No available medics (must wait 5 minutes between actions)');
+
+    const medic = medics[0];
+    const levelData = SKILLS.Medic.levels[medic.level - 1];
+    const roll = Math.random() * 100;
+    let produced = 0;
+
+    for (const [amount, chance] of levelData.produce.chances) {
+      if (roll <= chance) {
+        produced = amount;
+        break;
+      }
+    }
+
+    if (produced > 0) {
+      await addToInventory(player.playerId, 'medicine', produced);
+      message.reply(`Your medic produced ${produced} medicine(s)!`);
+    } else {
+      message.reply('Your medic failed to produce anything this time.');
+    }
+
+    // Add XP based on production
+    const xpGain = produced > 0 ? 10 : 15;
+    await addXP(medic, xpGain);
+    
+    medic.lastAction = new Date();
+    await medic.save();
+  } catch (error) {
+    console.error('Medic error:', error);
+    message.reply('Error processing medic command');
+  }
+}
+
+// =================
+// XP System
+// =================
+async function addXP(unit, amount) {
+  unit.xp += amount;
+  const xpNeeded = calculateXPForLevel(unit.level);
+  
+  if (unit.xp >= xpNeeded && unit.level < 6) {
+    unit.level += 1;
+    unit.xp = 0;
+    
+    // Update unit stats based on new level
+    const levelData = SKILLS[unit.type].levels[unit.level - 1];
+    unit.combat = levelData.c;
+    unit.movement = levelData.m;
+    
+    if (levelData.visibilityThreshold !== undefined) {
+      unit.visibilityThreshold = levelData.visibilityThreshold;
+    }
+    
+    await unit.save();
+    return true; // Leveled up
+  }
+  
+  await unit.save();
+  return false; // Didn't level up
+}
+
+// =================
+// Movement System
+// =================
+async function handleMoveCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const unitId = args[0];
+    const destination = args[1]?.toLowerCase();
+
+    if (!unitId || !destination) {
+      return message.reply('Usage: !move <unitId> <destination> (capital, market, mountain, etc.)');
+    }
+
+    const unit = player.Units.find(u => u.unitId === unitId);
+    if (!unit) return message.reply('Unit not found');
+
+    // Check if unit has enough movement
+    const movementCost = getMovementCost(unit.position, destination, unit.type);
+    if (unit.movement < movementCost) {
+      return message.reply(`Not enough movement (needs ${movementCost}, has ${unit.movement})`);
+    }
+
+    // Special position requirements
+    if (destination === 'mountain' && unit.type !== 'Miner') {
+      return message.reply('Only miners can move to mountain spaces');
+    }
+
+    // Update unit
+    unit.position = destination;
+    unit.movement -= movementCost;
+    await unit.save();
+
+    message.reply(`Moved ${unit.type} to ${destination}. Remaining movement: ${unit.movement}`);
+  } catch (error) {
+    console.error('Move error:', error);
+    message.reply('Error processing move command');
+  }
+}
+
+function getMovementCost(from, to, unitType) {
+  // Special movement costs based on terrain and unit type
+  if (to === 'water') {
+    return unitType === 'Merfolk' || unitType === 'Kappa' ? 2 : 3;
+  }
+  if (to === 'mountain') {
+    return unitType === 'Avian' ? 2 : 3;
+  }
+  return 1; // Default movement cost
 }
 
 // =================
@@ -675,6 +1106,163 @@ async function handleBuyCommand(message, args) {
   }
 }
 
+async function handleSellCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const marketUnits = player.Units.filter(u => u.position === 'market');
+    if (marketUnits.length === 0) return message.reply('You need a unit at the market to sell items');
+
+    const item = args[0]?.toLowerCase();
+    const quantity = parseInt(args[1]) || 1;
+
+    if (!item || !MARKET_PRICES[item]) {
+      return message.reply(`Available items: ${Object.keys(MARKET_PRICES).join(', ')}`);
+    }
+
+    const inventoryItem = player.Inventories.find(i => i.itemType === item);
+    if (!inventoryItem || inventoryItem.quantity < quantity) {
+      return message.reply(`You don't have enough ${item} to sell`);
+    }
+
+    const price = typeof MARKET_PRICES[item].sell === 'function' 
+      ? MARKET_PRICES[item].sell(inventoryItem.value) * quantity 
+      : MARKET_PRICES[item].sell * quantity;
+
+    const merchantLevel = player.Units
+      .filter(u => u.type === 'Merchant')
+      .reduce((max, u) => Math.max(max, u.level), 0);
+    
+    const discount = merchantLevel * 0.05;
+    const finalPrice = Math.floor(price * (1 + discount)); // Bonus when selling
+
+    await player.update({ gold: player.gold + finalPrice });
+    await removeFromInventory(player.playerId, item, quantity);
+
+    message.reply(`Sold ${quantity} ${item} for ${finalPrice}g${discount > 0 ? ` (${discount*100}% bonus applied)` : ''}`);
+  } catch (error) {
+    console.error('Sell error:', error);
+    message.reply('Error processing sell command');
+  }
+}
+
+// =================
+// Combat System
+// =================
+async function handleAttackCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const attackerId = args[0];
+    const targetType = args[1]?.toLowerCase();
+    const targetId = args[2];
+
+    if (!attackerId || !targetType || !targetId) {
+      return message.reply('Usage: !attack <attackerId> <unit|kingdom> <targetId>');
+    }
+
+    const attacker = player.Units.find(u => u.unitId === attackerId);
+    if (!attacker) return message.reply('Attacker not found');
+
+    if (attacker.combat <= 0) return message.reply('This unit cannot attack (0 combat value)');
+
+    // Check if attacker has enough movement (attacking costs 1 movement)
+    if (attacker.movement < 1) {
+      return message.reply('This unit doesn\'t have enough movement to attack');
+    }
+
+    let targetPlayer, targetUnit, damage;
+    if (targetType === 'unit') {
+      // Find target unit (must be in same position)
+      targetUnit = await Unit.findOne({ 
+        where: { 
+          unitId: targetId,
+          position: attacker.position 
+        },
+        include: [Player]
+      });
+      
+      if (!targetUnit) return message.reply('Target unit not found in your location');
+      targetPlayer = targetUnit.Player;
+      
+      // Calculate damage
+      damage = Math.max(1, attacker.combat - (targetUnit.combat / 2));
+      
+      // Apply damage
+      targetUnit.combat -= damage;
+      if (targetUnit.combat <= 0) {
+        await targetUnit.destroy();
+        message.reply(`Your ${attacker.type} defeated the enemy ${targetUnit.type}!`);
+        
+        // Special effects (Vampirian)
+        if (player.race === 'Vampirian') {
+          await addToInventory(player.playerId, 'food', 1);
+          message.reply('Your Vampirian unit gained 1 food from the kill!');
+        }
+      } else {
+        await targetUnit.save();
+        message.reply(`Your ${attacker.type} dealt ${damage.toFixed(2)} damage to enemy ${targetUnit.type} (remaining: ${targetUnit.combat.toFixed(2)})`);
+      }
+    } else if (targetType === 'kingdom') {
+      // Find target player
+      targetPlayer = await Player.findByPk(targetId);
+      if (!targetPlayer) return message.reply('Target kingdom not found');
+      
+      // Calculate mood damage (1 mood per 5 combat)
+      damage = Math.floor(attacker.combat / 5);
+      if (damage < 1) damage = 1;
+      
+      await targetPlayer.update({ 
+        mood: Math.max(1, targetPlayer.mood - damage) 
+      });
+      message.reply(`Your ${attacker.type} raided ${targetPlayer.username}'s kingdom, reducing their mood by ${damage}`);
+    } else {
+      return message.reply('Invalid target type (must be unit or kingdom)');
+    }
+
+    // Deduct movement from attacker
+    attacker.movement -= 1;
+    await attacker.save();
+    
+    // Add XP for attacking
+    await addXP(attacker, 15);
+  } catch (error) {
+    console.error('Attack error:', error);
+    message.reply('Error processing attack command');
+  }
+}
+
+// =================
+// Reset Command
+// =================
+async function handleResetCommand(message) {
+  try {
+    if (!message.content.toLowerCase().includes('yesireallywanttoresetmykingdom')) {
+      return message.reply('Are you sure you want to reset your kingdom? This cannot be undone. Type "!YesIReallyWantToResetMyKingdom" to confirm.');
+    }
+
+    const player = await Player.findByPk(message.author.id);
+    if (!player) return message.reply('You don\'t have a kingdom to reset');
+
+    // Delete all associated data
+    await Unit.destroy({ where: { PlayerId: player.playerId } });
+    await Inventory.destroy({ where: { PlayerId: player.playerId } });
+    await Structure.destroy({ where: { PlayerId: player.playerId } });
+    await player.destroy();
+
+    message.reply('Your kingdom has been completely reset. Use !setup to create a new one.');
+  } catch (error) {
+    console.error('Reset error:', error);
+    message.reply('Error resetting kingdom');
+  }
+}
+
 // =============
 // Bot Startup
 // =============
@@ -682,6 +1270,7 @@ bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.tag}`);
   await initDatabase();
   
+  // Run daily update every 24 hours
   setInterval(handleDailyUpdate, 24 * 60 * 60 * 1000);
   await handleDailyUpdate();
 });
@@ -692,13 +1281,48 @@ bot.on('messageCreate', async message => {
   const args = message.content.slice(1).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  if (command === 'setup') await handleSetupCommand(message);
-  else if (command === 'status') await handleStatusCommand(message);
-  else if (command === 'farm') await handleFarmCommand(message);
-  else if (command === 'mine') await handleMineCommand(message);
-  else if (command === 'smith') await handleSmithCommand(message, args);
-  else if (command === 'invent') await handleInventCommand(message);
-  else if (command === 'buy') await handleBuyCommand(message, args);
+  try {
+    if (command === 'setup') await handleSetupCommand(message);
+    else if (command === 'status') await handleStatusCommand(message);
+    else if (command === 'farm') await handleFarmCommand(message);
+    else if (command === 'hunt') await handleHuntCommand(message);
+    else if (command === 'mine') await handleMineCommand(message);
+    else if (command === 'smith') await handleSmithCommand(message, args);
+    else if (command === 'invent') await handleInventCommand(message);
+    else if (command === 'monk') await handleMonkCommand(message);
+    else if (command === 'merchant') await handleMerchantCommand(message);
+    else if (command === 'entertain') await handleEntertainCommand(message);
+    else if (command === 'medic') await handleMedicCommand(message);
+    else if (command === 'buy') await handleBuyCommand(message, args);
+    else if (command === 'sell') await handleSellCommand(message, args);
+    else if (command === 'move') await handleMoveCommand(message, args);
+    else if (command === 'attack') await handleAttackCommand(message, args);
+    else if (command === 'yesireallywanttoresetmykingdom') await handleResetCommand(message);
+    else if (command === 'commands') {
+      message.reply(`
+Available commands:
+!setup - Create your kingdom
+!status - View your kingdom status
+!farm - Have farmers produce food
+!hunt - Have hunters produce food
+!mine - Have miners produce ore/gems
+!smith <weapon|armor> - Create weapons/armor
+!invent - Have inventors create trinkets
+!monk - Have monks brew beer
+!merchant - Have merchants earn gold
+!entertain - Have entertainers create art
+!medic - Have medics produce medicine
+!buy <item> [quantity] - Buy from market
+!sell <item> [quantity] - Sell to market
+!move <unitId> <destination> - Move unit
+!attack <unitId> <unit|kingdom> <targetId> - Attack
+!YesIReallyWantToResetMyKingdom - Reset kingdom
+      `);
+    }
+  } catch (error) {
+    console.error(`Error processing command ${command}:`, error);
+    message.reply('An error occurred while processing your command');
+  }
 });
 
 bot.login(process.env.TOKEN).catch(error => {
