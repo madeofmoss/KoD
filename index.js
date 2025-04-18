@@ -11,43 +11,18 @@ const bot = new Client({
 // ======================
 // Database Configuration
 // ======================
-function getDatabaseConfig() {
-  // Use Railway's environment variables if available
-  if (process.env.RAILWAY_ENVIRONMENT) {
-    return {
-      host: process.env.RAILWAY_PRIVATE_DOMAIN || process.env.PGHOST,
-      port: process.env.RAILWAY_PRIVATE_PORT || process.env.PGPORT,
-      username: process.env.RAILWAY_DB_USERNAME || process.env.PGUSER,
-      password: process.env.RAILWAY_DB_PASSWORD || process.env.PGPASSWORD,
-      database: process.env.RAILWAY_DB_NAME || process.env.PGDATABASE
-    };
-  }
-
-  // Fallback to local development config
-  return {
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'postgres',
-    database: 'kingdom_bot'
-  };
-}
-
-const databaseConfig = getDatabaseConfig();
-
-const sequelize = new Sequelize({
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
-  ...databaseConfig,
   dialectOptions: {
-    ssl: process.env.RAILWAY_ENVIRONMENT ? {
+    ssl: {
       require: true,
       rejectUnauthorized: false
-    } : false
+    }
   },
-  logging: console.log, // Enable for debugging, set to false for production
+  logging: console.log,
   retry: {
-    max: 5, // Maximum number of retries
-    timeout: 5000, // Timeout between retries (ms)
+    max: 5,
+    timeout: 5000,
     match: [
       /ECONNREFUSED/,
       /ETIMEDOUT/,
@@ -106,20 +81,20 @@ Inventory.belongsTo(Player, { foreignKey: 'PlayerId' });
 async function initDatabase() {
   try {
     console.log('Attempting to connect to database...');
-    console.log('Database config:', {
-      ...databaseConfig,
-      password: databaseConfig.password ? '*****' : 'undefined'
-    });
-
+    console.log('Using DATABASE_URL:', process.env.DATABASE_URL ? '*****' : 'undefined');
+    
     await sequelize.authenticate();
     console.log('Database connection established');
     
-    // Sync all models
     await sequelize.sync({ alter: true });
     console.log('Database models synchronized');
   } catch (error) {
     console.error('Database initialization failed:', error);
-    console.error('Full error details:', JSON.stringify(error, null, 2));
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     process.exit(1);
   }
 }
@@ -135,6 +110,17 @@ function getRandomRace() {
 function getRandomSkill() {
   const skills = ['Farmer', 'Warrior', 'Merchant', 'Hunter', 'Medic'];
   return skills[Math.floor(Math.random() * skills.length)];
+}
+
+function getCombatValue(unitType, level) {
+  const baseValues = {
+    Farmer: 1,
+    Warrior: 2 + level,
+    Merchant: 1,
+    Hunter: 1 + Math.floor(level/2),
+    Medic: 1
+  };
+  return baseValues[unitType] || 1;
 }
 
 // =================
@@ -181,7 +167,32 @@ async function handleSetupCommand(message) {
   }
 }
 
-// ... [rest of your command handlers]
+async function handleStatusCommand(message) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit, Inventory]
+    });
+    
+    if (!player) return message.reply('Use !setup first');
+
+    const embed = new EmbedBuilder()
+      .setTitle(`${player.username}'s Kingdom`)
+      .addFields(
+        { name: 'Race', value: player.race, inline: true },
+        { name: 'Skills', value: `${player.skill1}, ${player.skill2}`, inline: true },
+        { name: 'Gold', value: `${player.gold}g`, inline: true },
+        { name: 'Population', value: player.population.toString(), inline: true },
+        { name: 'Mood', value: `${player.mood}/5`, inline: true },
+        { name: 'Food', value: player.food.toString(), inline: true },
+        { name: 'Units', value: player.Units.length.toString(), inline: true }
+      );
+
+    message.reply({ embeds: [embed] });
+  } catch (error) {
+    console.error('Status error:', error);
+    message.reply('Error fetching status');
+  }
+}
 
 // =============
 // Bot Startup
@@ -206,15 +217,3 @@ bot.login(process.env.TOKEN).catch(error => {
   console.error('Login failed:', error);
   process.exit(1);
 });
-
-// Utility function for combat values
-function getCombatValue(unitType, level) {
-  const baseValues = {
-    Farmer: 1,
-    Warrior: 2 + level,
-    Merchant: 1,
-    Hunter: 1 + Math.floor(level/2),
-    Medic: 1
-  };
-  return baseValues[unitType] || 1;
-}
