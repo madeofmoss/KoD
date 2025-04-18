@@ -66,7 +66,6 @@ const SKILLS = {
     ],
     requires: 'mountain'
   },
-  // Add other skills following the same pattern
   Smith: {
     emoji: '⚒',
     levels: [
@@ -88,8 +87,7 @@ const SKILLS = {
       { c: 1, m: 5, produce: { item: 'trinket', chances: [[1,80],[2,20]] } },
       { c: 1, m: 6, produce: { item: 'trinket', chances: [[1,80],[2,10],[3,10]] } }
     ]
-  },
-  // Add remaining skills...
+  }
 };
 
 const MARKET_PRICES = {
@@ -112,8 +110,7 @@ const MONTHS = [
 const EVENTS = [
   { name: 'Sky Terror', description: 'A Quetzacoatl has been seen in the southeast' },
   { name: 'Crustacean Fury 🦀', description: 'Gigantic crabs ravage the coastlines' },
-  { name: 'Moving Shadows 👥', description: 'Stories of shadows lurking and whispering' },
-  // Add more events
+  { name: 'Moving Shadows 👥', description: 'Stories of shadows lurking and whispering' }
 ];
 
 // =====================
@@ -203,7 +200,7 @@ function getCurrentDate() {
   return {
     month: MONTHS[month],
     day: day,
-    season: MONTHS[Math.floor(month / 3) * 3].split(' ')[2] // Get season emoji
+    season: MONTHS[Math.floor(month / 3) * 3].split(' ')[2]
   };
 }
 
@@ -212,12 +209,12 @@ function getDailyEvent() {
   return {
     name: event.name,
     description: event.description,
-    isPublic: Math.random() > 0.3 // 70% chance public
+    isPublic: Math.random() > 0.3
   };
 }
 
 function getRandomFloat(min, max, decimals = 8) {
-  return parseFloat((Math.random() * (max - min) + min).toFixed(decimals);
+  return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
 }
 
 // =================
@@ -233,12 +230,11 @@ async function handleSetupCommand(message) {
     const skill1 = getRandomSkill();
     let skill2 = getRandomSkill();
     
-    // Ensure skills are different
     while (skill2 === skill1) {
       skill2 = getRandomSkill();
     }
 
-    const gold = 80 + (playerCount * 10) + Math.floor(Math.random() * 41); // 80 + 10 per player + random 0-40
+    const gold = 80 + (playerCount * 10) + Math.floor(Math.random() * 41);
 
     const player = await Player.create({
       playerId: message.author.id,
@@ -250,7 +246,6 @@ async function handleSetupCommand(message) {
       turnOrder: playerCount + 1
     });
 
-    // Create starting units
     await createUnit(message.author.id, skill1);
     await createUnit(message.author.id, skill2);
 
@@ -334,28 +329,23 @@ async function handleDailyUpdate() {
     const date = getCurrentDate();
     const event = getDailyEvent();
 
-    // Process each player
     for (const player of players) {
-      // Population changes
       let populationChange = 0;
       if (player.mood === 5) populationChange += 1;
       if (player.food > player.population) populationChange += 1;
       if (player.mood === 1) populationChange -= 1;
       if (player.population > player.food) populationChange -= 1;
 
-      // Apply changes
       await player.update({
         population: Math.max(0, player.population + populationChange),
         food: Math.max(0, player.food - player.population),
-        gold: player.gold + 10 // Daily gold income
+        gold: player.gold + 10
       });
 
-      // Add daily units
       await createUnit(player.playerId, player.skill1);
       await createUnit(player.playerId, player.skill2);
     }
 
-    // Post daily announcement
     const announcementChannel = bot.channels.cache.get(process.env.ANNOUNCEMENT_CHANNEL);
     if (announcementChannel) {
       const embed = new EmbedBuilder()
@@ -437,7 +427,6 @@ async function handleMineCommand(message) {
       const roll = Math.random() * 100;
       let producedOre = 0;
 
-      // Check for ore production
       for (const [amount, chance] of levelData.produce.chances) {
         if (roll <= chance) {
           producedOre = amount;
@@ -445,7 +434,6 @@ async function handleMineCommand(message) {
         }
       }
 
-      // Check for gem chance
       let producedGem = 0;
       if (Math.random() * 100 < levelData.produce.special.chance) {
         producedGem = 1;
@@ -457,7 +445,6 @@ async function handleMineCommand(message) {
       await miner.save();
     }
 
-    // Add to inventory
     if (totalOre > 0) {
       await addToInventory(player.playerId, 'ore', totalOre);
     }
@@ -496,13 +483,11 @@ async function handleSmithCommand(message, args) {
     
     if (smiths.length === 0) return message.reply('No available smiths (must wait 5 minutes between actions)');
 
-    const smith = smiths[0]; // Use first available smith
+    const smith = smiths[0];
     const levelData = SKILLS.Smith.levels[smith.level - 1];
     
-    // Calculate base value
     const baseValue = getRandomFloat(levelData.produce.minValue, levelData.produce.maxValue);
     
-    // Check for ore/gem enhancements
     let oreUsed = 0;
     let gemsUsed = 0;
     let finalValue = baseValue;
@@ -510,22 +495,18 @@ async function handleSmithCommand(message, args) {
     const playerOre = player.Inventories.find(i => i.itemType === 'ore')?.quantity || 0;
     const playerGems = player.Inventories.find(i => i.itemType === 'gem')?.quantity || 0;
     
-    // Use ore if available (1 ore = +1 combat)
     if (playerOre > 0 && await confirmAction(message, 'Use 1 ore to add +1 combat value?')) {
       oreUsed = 1;
       finalValue += 1;
     }
     
-    // Use gems if available (gem = multiplier)
     if (playerGems > 0 && await confirmAction(message, 'Use 1 gem to multiply combat value?')) {
       gemsUsed = 1;
-      finalValue *= 2; // Double the value
+      finalValue *= 2;
     }
     
-    // Create the item
     await addToInventory(player.playerId, itemType, 1, finalValue);
     
-    // Deduct used materials
     if (oreUsed > 0) {
       await removeFromInventory(player.playerId, 'ore', oreUsed);
     }
@@ -557,7 +538,7 @@ async function handleInventCommand(message) {
     
     if (inventors.length === 0) return message.reply('No available inventors (must wait 5 minutes between actions)');
 
-    const inventor = inventors[0]; // Use first available inventor
+    const inventor = inventors[0];
     const levelData = SKILLS.Inventor.levels[inventor.level - 1];
     const roll = Math.random() * 100;
     let produced = 0;
@@ -659,7 +640,6 @@ async function handleBuyCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    // Check if player has a unit at market
     const marketUnits = player.Units.filter(u => u.position === 'market');
     if (marketUnits.length === 0) return message.reply('You need a unit at the market to buy items');
 
@@ -678,12 +658,11 @@ async function handleBuyCommand(message, args) {
       return message.reply(`Not enough gold. You need ${price}g but only have ${player.gold}g`);
     }
 
-    // Apply merchant discount if available
     const merchantLevel = player.Units
       .filter(u => u.type === 'Merchant')
       .reduce((max, u) => Math.max(max, u.level), 0);
     
-    const discount = merchantLevel * 0.05; // 5% per merchant level
+    const discount = merchantLevel * 0.05;
     const finalPrice = Math.floor(price * (1 - discount));
 
     await player.update({ gold: player.gold - finalPrice });
@@ -703,10 +682,7 @@ bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.tag}`);
   await initDatabase();
   
-  // Schedule daily updates (every 24 hours)
   setInterval(handleDailyUpdate, 24 * 60 * 60 * 1000);
-  
-  // Initial daily update
   await handleDailyUpdate();
 });
 
@@ -723,7 +699,6 @@ bot.on('messageCreate', async message => {
   else if (command === 'smith') await handleSmithCommand(message, args);
   else if (command === 'invent') await handleInventCommand(message);
   else if (command === 'buy') await handleBuyCommand(message, args);
-  // Add other commands here
 });
 
 bot.login(process.env.TOKEN).catch(error => {
