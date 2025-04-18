@@ -1267,7 +1267,7 @@ async function handleEquipCommand(message, args) {
       `${index + 1}. ${item.itemType} (Value: ${item.value.toFixed(2)})`
     ).join('\n');
 
-    await message.reply(`Which ${equipType} would you like to equip?\n${itemList}\n\nReply with the number or "cancel"`);
+    const promptMessage = await message.reply(`Which ${equipType} would you like to equip?\n${itemList}\n\nReply with the number or "cancel"`);
 
     // Wait for user response
     const filter = m => m.author.id === message.author.id;
@@ -1284,7 +1284,7 @@ async function handleEquipCommand(message, args) {
     }
 
     const choice = parseInt(response) - 1;
-    if (isNaN(choice)) {  // Fixed this line
+    if (isNaN(choice)) {
       return message.reply('Invalid choice. Please enter a number.');
     }
 
@@ -1297,66 +1297,17 @@ async function handleEquipCommand(message, args) {
     // Equip the item
     if (equipType === 'weapon') {
       unit.equippedWeapon = selectedItem.value;
-      message.reply(`Equipped weapon with +${selectedItem.value.toFixed(2)} combat to your ${unit.type}!`);
+      await message.reply(`Equipped weapon with +${selectedItem.value.toFixed(2)} combat to your ${unit.type}!`);
     } else {
       unit.equippedArmor = selectedItem.value;
-      message.reply(`Equipped armor with +${selectedItem.value.toFixed(2)} defense to your ${unit.type}!`);
+      await message.reply(`Equipped armor with +${selectedItem.value.toFixed(2)} defense to your ${unit.type}!`);
     }
     
     await unit.save();
     await removeFromInventory(player.playerId, equipType, 1);
   } catch (error) {
     console.error('Equip error:', error);
-    message.reply('Error processing equip command');
-  }
-}
-
-    // List available items
-    let itemList = items.map((item, index) => 
-      `${index + 1}. ${item.itemType} (Value: ${item.value.toFixed(2)})`
-    ).join('\n');
-
-    await message.reply(`Which ${equipType} would you like to equip?\n${itemList}\n\nReply with the number or "cancel"`);
-
-    // Wait for user response
-    const filter = m => m.author.id === message.author.id;
-    const collected = await message.channel.awaitMessages({
-      filter,
-      max: 1,
-      time: 30000,
-      errors: ['time']
-    });
-    
-    const response = collected.first().content.toLowerCase();
-    if (response === 'cancel') {
-      return message.reply('Equip canceled.');
-    }
-
-    const choice = parseInt(response) - 1;
-    if (isNaN(choice) {
-      return message.reply('Invalid choice. Please enter a number.');
-    }
-
-    if (choice < 0 || choice >= items.length) {
-      return message.reply('Invalid item selection.');
-    }
-
-    const selectedItem = items[choice];
-    
-    // Equip the item
-    if (equipType === 'weapon') {
-      unit.equippedWeapon = selectedItem.value;
-      message.reply(`Equipped weapon with +${selectedItem.value.toFixed(2)} combat to your ${unit.type}!`);
-    } else {
-      unit.equippedArmor = selectedItem.value;
-      message.reply(`Equipped armor with +${selectedItem.value.toFixed(2)} defense to your ${unit.type}!`);
-    }
-    
-    await unit.save();
-    await removeFromInventory(player.playerId, equipType, 1);
-  } catch (error) {
-    console.error('Equip error:', error);
-    message.reply('Error processing equip command');
+    await message.reply('Error processing equip command');
   }
 }
 
