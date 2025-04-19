@@ -26,20 +26,116 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
 // Game Constants
 // =====================
 const RACES = {
-  Elf: { bonus: '+1 Architect level', effect: 'Units have +1c on forest spaces' },
-  Dwarf: { bonus: '+1 Smith & +1 Miner level', effect: 'None' },
-  Human: { bonus: '+1 Inventor & +1 Merchant level', effect: 'None' },
-  Draconian: { bonus: '+40 starting gold', effect: 'None' },
-  Goblin: { bonus: 'None', effect: 'Units have -1c, Population doesn\'t decrease until food is 4 less' },
-  Orc: { bonus: '+1 Warrior & +1 Smith level', effect: 'None' },
-  Merfolk: { bonus: 'None', effect: '+1c on water, Water movement costs 2m' },
-  Treefolk: { bonus: '+1 Architect level', effect: '+1c on forest spaces' },
-  Xathri: { bonus: 'None', effect: '+1m in forest, Population doesn\'t decrease until food is 2 less' },
-  Vampirian: { bonus: 'None', effect: 'Units gain +1 food when killing another unit' },
-  DarkElf: { bonus: '+1 Medic level', effect: '+1c on forest spaces' },
-  Hobbit: { bonus: '+1 Farmer & +1 Rogue level', effect: 'None' },
-  Kappa: { bonus: 'None', effect: '+1c when attacked, Water movement costs 2m' },
-  Avian: { bonus: '+1 Architect level', effect: 'Mountain movement costs 2m' }
+  Elf: { 
+    bonus: '+1 Architect level', 
+    effect: 'Units have +1c on forest spaces',
+    applyBonus: async (player) => {
+      await player.update({ architectLevel: Math.min(6, player.architectLevel + 1) };
+    }
+  },
+  Dwarf: { 
+    bonus: '+1 Smith & +1 Miner level', 
+    effect: 'None',
+    applyBonus: async (player) => {
+      await player.update({ 
+        smithLevel: Math.min(6, player.smithLevel + 1),
+        minerLevel: Math.min(6, player.minerLevel + 1)
+      });
+    }
+  },
+  Human: { 
+    bonus: '+1 Inventor & +1 Merchant level', 
+    effect: 'None',
+    applyBonus: async (player) => {
+      await player.update({ 
+        inventorLevel: Math.min(6, player.inventorLevel + 1),
+        merchantLevel: Math.min(6, player.merchantLevel + 1)
+      });
+    }
+  },
+  Draconian: { 
+    bonus: '+40 starting gold', 
+    effect: 'None',
+    applyBonus: async (player) => {
+      await player.update({ gold: player.gold + 40 });
+    }
+  },
+  Goblin: { 
+    bonus: 'None', 
+    effect: 'Units have -1c, Population doesn\'t decrease until food is 4 less',
+    applyBonus: async (player) => {
+      // Effect is handled in daily update
+    }
+  },
+  Orc: { 
+    bonus: '+1 Warrior & +1 Smith level', 
+    effect: 'None',
+    applyBonus: async (player) => {
+      await player.update({ 
+        warriorLevel: Math.min(6, player.warriorLevel + 1),
+        smithLevel: Math.min(6, player.smithLevel + 1)
+      });
+    }
+  },
+  Merfolk: { 
+    bonus: 'None', 
+    effect: '+1c on water, Water movement costs 2m',
+    applyBonus: async (player) => {
+      // Effect is handled in movement and combat
+    }
+  },
+  Treefolk: { 
+    bonus: '+1 Architect level', 
+    effect: '+1c on forest spaces',
+    applyBonus: async (player) => {
+      await player.update({ architectLevel: Math.min(6, player.architectLevel + 1) });
+    }
+  },
+  Xathri: { 
+    bonus: 'None', 
+    effect: '+1m in forest, Population doesn\'t decrease until food is 2 less',
+    applyBonus: async (player) => {
+      // Effect is handled in daily update and movement
+    }
+  },
+  Vampirian: { 
+    bonus: 'None', 
+    effect: 'Units gain +1 food when killing another unit',
+    applyBonus: async (player) => {
+      // Effect is handled in combat
+    }
+  },
+  DarkElf: { 
+    bonus: '+1 Medic level', 
+    effect: '+1c on forest spaces',
+    applyBonus: async (player) => {
+      await player.update({ medicLevel: Math.min(6, player.medicLevel + 1) });
+    }
+  },
+  Hobbit: { 
+    bonus: '+1 Farmer & +1 Rogue level', 
+    effect: 'None',
+    applyBonus: async (player) => {
+      await player.update({ 
+        farmerLevel: Math.min(6, player.farmerLevel + 1),
+        rogueLevel: Math.min(6, player.rogueLevel + 1)
+      });
+    }
+  },
+  Kappa: { 
+    bonus: 'None', 
+    effect: '+1c when attacked, Water movement costs 2m',
+    applyBonus: async (player) => {
+      // Effect is handled in combat and movement
+    }
+  },
+  Avian: { 
+    bonus: '+1 Architect level', 
+    effect: 'Mountain movement costs 2m',
+    applyBonus: async (player) => {
+      await player.update({ architectLevel: Math.min(6, player.architectLevel + 1) });
+    }
+  }
 };
 
 const SKILLS = {
@@ -613,6 +709,10 @@ async function processMovement() {
       } else if (unit.wanderingSpaces > 0) {
         // Wandering in forest
         unit.wanderingSpaces -= unit.movement;
+        
+        // Add XP for wandering (same as traveling)
+        await addXP(unit.PlayerId, unit.type, 2);
+        
         if (unit.wanderingSpaces <= 0) {
           unit.wanderingSpaces = 0;
           // Restore movement points
@@ -650,6 +750,10 @@ async function processMovement() {
       } else if (unit.sailingSpaces > 0) {
         // Sailing at coast
         unit.sailingSpaces -= unit.movement;
+        
+        // Add XP for sailing (same as traveling)
+        await addXP(unit.PlayerId, unit.type, 2);
+        
         if (unit.sailingSpaces <= 0) {
           unit.sailingSpaces = 0;
           // Restore movement points
@@ -713,7 +817,20 @@ async function processMovement() {
 
 async function handleCombat(unit, enemyCR, enemyType) {
   const player = await Player.findByPk(unit.PlayerId);
-  const unitCR = unit.combat + (unit.equippedWeapon || 0);
+  
+  // Apply race bonuses
+  let combatBonus = 0;
+  if (player.race === 'Merfolk' && (unit.position === 'coast' || unit.position === 'water')) {
+    combatBonus += 1;
+  }
+  if ((player.race === 'Elf' || player.race === 'Treefolk' || player.race === 'DarkElf') && unit.position === 'forest') {
+    combatBonus += 1;
+  }
+  if (player.race === 'Kappa' && enemyType === 'monster') {
+    combatBonus += 1;
+  }
+  
+  const unitCR = unit.combat + (unit.equippedWeapon || 0) + combatBonus;
   
   // Calculate combat result
   const playerRoll = Math.random() * unitCR;
@@ -736,16 +853,16 @@ async function handleCombat(unit, enemyCR, enemyType) {
   }
 }
 
-function getMovementCost(from, to, unitType) {
-  // Special movement costs based on terrain and unit type
+function getMovementCost(from, to, unitType, race) {
+  // Special movement costs based on terrain and unit type/race
   if (to === 'water' || to === 'coast') {
-    return unitType === 'Merfolk' || unitType === 'Kappa' ? 2 : 3;
+    return race === 'Merfolk' || race === 'Kappa' ? 2 : 3;
   }
   if (to === 'mountain') {
-    return unitType === 'Avian' ? 2 : 3;
+    return race === 'Avian' ? 2 : 3;
   }
   if (to === 'forest') {
-    return unitType === 'Elf' || unitType === 'Treefolk' || unitType === 'Xathri' ? 1 : 2;
+    return race === 'Elf' || race === 'Treefolk' || race === 'Xathri' || race === 'DarkElf' ? 1 : 2;
   }
   return 1; // Default movement cost
 }
@@ -818,6 +935,9 @@ async function handleSetupCommand(message) {
       distanceToCoast,
       turnOrder: playerCount + 1
     });
+
+    // Apply race bonuses
+    await RACES[race].applyBonus(player);
 
     await createUnit(message.author.id, skill1);
     await createUnit(message.author.id, skill2);
@@ -1076,10 +1196,25 @@ async function handleDailyUpdate() {
 
     for (const player of players) {
       let populationChange = 0;
-      if (player.mood === 5) populationChange += 1;
-      if (player.food > player.population) populationChange += 1;
-      if (player.mood === 1) populationChange -= 1;
-      if (player.population > player.food) populationChange -= 1;
+      
+      // Handle race-specific population rules
+      if (player.race === 'Goblin') {
+        if (player.mood === 5) populationChange += 1;
+        if (player.food > player.population - 4) populationChange += 1;
+        if (player.mood === 1) populationChange -= 1;
+        if (player.population > player.food + 4) populationChange -= 1;
+      } else if (player.race === 'Xathri') {
+        if (player.mood === 5) populationChange += 1;
+        if (player.food > player.population - 2) populationChange += 1;
+        if (player.mood === 1) populationChange -= 1;
+        if (player.population > player.food + 2) populationChange -= 1;
+      } else {
+        // Standard population rules
+        if (player.mood === 5) populationChange += 1;
+        if (player.food > player.population) populationChange += 1;
+        if (player.mood === 1) populationChange -= 1;
+        if (player.population > player.food) populationChange -= 1;
+      }
 
       await player.update({
         population: Math.max(0, player.population + populationChange),
@@ -1601,13 +1736,13 @@ async function handleWanderCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const unitId = args[0];
-    const spaces = parseInt(args[1]) || 10;
+    const unitName = args.join(' ');
+    const spaces = parseInt(args[args.length - 1]) || 10;
 
-    if (!unitId) return message.reply('Specify a unit ID to wander. Use !units to see your units.');
+    if (!unitName) return message.reply('Specify a unit name to wander. Use !units to see your units.');
     if (spaces <= 0) return message.reply('You must wander at least 1 space.');
 
-    const unit = player.Units.find(u => u.unitId === unitId);
+    const unit = player.Units.find(u => u.name.toLowerCase() === unitName.toLowerCase());
     if (!unit) return message.reply('Unit not found');
     if (unit.position !== 'forest') return message.reply('Unit must be in the forest to wander');
     if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
@@ -1633,14 +1768,14 @@ async function handleSailCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const unitId = args[0];
-    const spaces = parseInt(args[1]) || 10;
+    const unitName = args.join(' ');
+    const spaces = parseInt(args[args.length - 1]) || 10;
 
-    if (!unitId) return message.reply('Specify a unit ID to sail. Use !units to see your units.');
+    if (!unitName) return message.reply('Specify a unit name to sail. Use !units to see your units.');
     if (spaces <= 0) return message.reply('You must sail at least 1 space.');
     if (spaces > 100) return message.reply('You cannot sail more than 100 spaces at once.');
 
-    const unit = player.Units.find(u => u.unitId === unitId);
+    const unit = player.Units.find(u => u.name.toLowerCase() === unitName.toLowerCase());
     if (!unit) return message.reply('Unit not found');
     if (unit.position !== 'coast') return message.reply('Unit must be at the coast to sail');
     if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
@@ -1722,10 +1857,10 @@ async function handleEquipCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const unitId = args[0];
-    if (!unitId) return message.reply('Specify a unit ID to equip. Use !units to see your units.');
+    const unitName = args[0];
+    if (!unitName) return message.reply('Specify a unit name to equip. Use !units to see your units.');
 
-    const unit = player.Units.find(u => u.unitId === unitId);
+    const unit = player.Units.find(u => u.name.toLowerCase() === unitName.toLowerCase());
     if (!unit) return message.reply('Unit not found');
 
     const equipType = args[1]?.toLowerCase();
@@ -1797,11 +1932,11 @@ async function handleMoveCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const unitId = args[0];
-    const destination = args[1]?.toLowerCase();
+    const unitName = args[0];
+    const destination = args[args.length - 1]?.toLowerCase();
 
-    if (!unitId || !destination) {
-      return message.reply('Usage: !move <unitId> <destination> (market, mountain, forest, coast, capital)');
+    if (!unitName || !destination) {
+      return message.reply('Usage: !move <unitName> <destination> (market, mountain, forest, coast, capital)');
     }
 
     const validDestinations = ['market', 'mountain', 'forest', 'coast', 'capital'];
@@ -1809,7 +1944,7 @@ async function handleMoveCommand(message, args) {
       return message.reply('Invalid destination. Must be market, mountain, forest, coast, or capital');
     }
 
-    const unit = player.Units.find(u => u.unitId === unitId);
+    const unit = player.Units.find(u => u.name.toLowerCase() === unitName.toLowerCase());
     if (!unit) return message.reply('Unit not found');
 
     if (unit.position === destination) {
@@ -1878,6 +2013,15 @@ async function handleMoveCommand(message, args) {
 // Inventory Helpers
 // =================
 async function addToInventory(playerId, itemType, quantity = 1, value = 0) {
+  // Special case for food - always add directly to player's food count
+  if (itemType === 'food') {
+    const player = await Player.findByPk(playerId);
+    if (player) {
+      await player.update({ food: player.food + quantity });
+    }
+    return;
+  }
+
   const existingItem = await Inventory.findOne({ 
     where: { 
       PlayerId: playerId, 
@@ -1902,6 +2046,15 @@ async function addToInventory(playerId, itemType, quantity = 1, value = 0) {
 }
 
 async function removeFromInventory(playerId, itemType, quantity = 1) {
+  // Special case for food - always remove directly from player's food count
+  if (itemType === 'food') {
+    const player = await Player.findByPk(playerId);
+    if (player) {
+      await player.update({ food: Math.max(0, player.food - quantity) });
+    }
+    return true;
+  }
+
   const item = await Inventory.findOne({ 
     where: { 
       PlayerId: playerId, 
@@ -1979,7 +2132,13 @@ async function handleBuyCommand(message, args) {
     const finalPrice = Math.floor(price * (1 - discount));
 
     await player.update({ gold: player.gold - finalPrice });
-    await addToInventory(player.playerId, item, quantity);
+    
+    // Special handling for food - add directly to player's food count
+    if (item === 'food') {
+      await player.update({ food: player.food + quantity });
+    } else {
+      await addToInventory(player.playerId, item, quantity);
+    }
 
     message.reply(`Purchased ${quantity} ${item} for ${finalPrice}g${discount > 0 ? ` (${discount*100}% discount applied)` : ''}`);
   } catch (error) {
@@ -2003,6 +2162,25 @@ async function handleSellCommand(message, args) {
 
     if (!item || !MARKET_PRICES[item]) {
       return message.reply(`Available items: ${Object.keys(MARKET_PRICES).join(', ')}`);
+    }
+
+    // Special handling for food - check player's food count
+    if (item === 'food') {
+      if (player.food < quantity) {
+        return message.reply(`You don't have enough ${item} to sell`);
+      }
+      
+      const price = MARKET_PRICES[item].sell * quantity;
+      const merchantLevel = player.merchantLevel;
+      const discount = merchantLevel * 0.05;
+      const finalPrice = Math.floor(price * (1 + discount)); // Bonus when selling
+
+      await player.update({ 
+        gold: player.gold + finalPrice,
+        food: player.food - quantity
+      });
+      
+      return message.reply(`Sold ${quantity} ${item} for ${finalPrice}g${discount > 0 ? ` (${discount*100}% bonus applied)` : ''}`);
     }
 
     const inventoryItem = player.Inventories.find(i => i.itemType === item);
@@ -2038,15 +2216,15 @@ async function handleAttackCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const attackerId = args[0];
+    const attackerName = args[0];
     const targetType = args[1]?.toLowerCase();
     const targetId = args[2];
 
-    if (!attackerId || !targetType || !targetId) {
-      return message.reply('Usage: !attack <attackerId> <unit|kingdom> <targetId>');
+    if (!attackerName || !targetType || !targetId) {
+      return message.reply('Usage: !attack <attackerName> <unit|kingdom> <targetId>');
     }
 
-    const attacker = player.Units.find(u => u.unitId === attackerId);
+    const attacker = player.Units.find(u => u.name.toLowerCase() === attackerName.toLowerCase());
     if (!attacker) return message.reply('Attacker not found');
 
     if (attacker.combat <= 0) return message.reply('This unit cannot attack (0 combat value)');
@@ -2211,12 +2389,12 @@ Available commands:
 !medic - Have a medic produce medicine
 !buy <item> [quantity] - Buy from market
 !sell <item> [quantity] - Sell to market
-!move <unitId> <destination> - Move unit (market/mountain/forest/coast/capital)
-!wander <unitId> [spaces] - Wander in forest (chance to encounter monsters)
-!sail <unitId> [spaces] - Sail at coast (chance to find resources or encounter pirates)
-!attack <unitId> <unit|kingdom> <targetId> - Attack
+!move <unitName> <destination> - Move unit (market/mountain/forest/coast/capital)
+!wander <unitName> [spaces] - Wander in forest (chance to encounter monsters)
+!sail <unitName> [spaces] - Sail at coast (chance to find resources or encounter pirates)
+!attack <unitName> <unit|kingdom> <targetId> - Attack
 !item <item> - Use an item (trinket, beer_barrel, art, medicine, tea)
-!equip <unitId> <weapon|armor> - Equip items to units
+!equip <unitName> <weapon|armor> - Equip items to units
 !YesIReallyWantToResetMyKingdom - Reset kingdom
       `);
     }
