@@ -134,12 +134,12 @@ const SKILLS = {
   Smith: {
     emoji: '⚒',
     levels: [
-      { c: 1, m: 4, produce: { item: 'weapon', minValue: 0.8, maxValue: 1.2 } },
-      { c: 1, m: 5, produce: { item: 'weapon', minValue: 1.8, maxValue: 2.2 } },
-      { c: 2, m: 5, produce: { item: 'weapon', minValue: 2.8, maxValue: 3.2 } },
-      { c: 2, m: 6, produce: { item: 'weapon', minValue: 3.8, maxValue: 4.2 } },
-      { c: 3, m: 7, produce: { item: 'weapon', minValue: 4.8, maxValue: 5.2 } },
-      { c: 3, m: 8, produce: { item: 'weapon', minValue: 5.8, maxValue: 6.2 } }
+      { c: 1, m: 4, produce: { item: 'weapon', minValue: 0.8, maxValue: 1.2, successRate: 60 } },
+      { c: 1, m: 5, produce: { item: 'weapon', minValue: 1.8, maxValue: 2.2, successRate: 70 } },
+      { c: 2, m: 5, produce: { item: 'weapon', minValue: 2.8, maxValue: 3.2, successRate: 80 } },
+      { c: 2, m: 6, produce: { item: 'weapon', minValue: 3.8, maxValue: 4.2, successRate: 90 } },
+      { c: 3, m: 7, produce: { item: 'weapon', minValue: 4.8, maxValue: 5.2, successRate: 95 } },
+      { c: 3, m: 8, produce: { item: 'weapon', minValue: 5.8, maxValue: 6.2, successRate: 100 } }
     ]
   },
   Entertainer: {
@@ -199,16 +199,203 @@ const MONTHS = [
 ];
 
 const EVENTS = [
-  { name: 'Sky Terror', description: 'A Quetzacoatl has been seen in the southeast' },
-  { name: 'Crustacean Fury 🦀', description: 'Gigantic crabs ravage the coastlines' },
-  { name: 'Moving Shadows 👥', description: 'Stories of shadows lurking and whispering' },
-  { name: 'Darvu Raiders', description: 'Bandits make themselves feel at home in Discordia' },
-  { name: 'Pilgrims', description: 'Citizens make a pilgrimage to Discordia' },
-  { name: 'Void Gate 🌌', description: 'Word has spread of a Gate to the Void in the Southeast' }
+  { 
+    name: 'Sky Terror', 
+    description: 'A Quetzacoatl has been seen in the southeast',
+    effect: async (players) => {
+      // No direct effect, just flavor
+    }
+  },
+  { 
+    name: 'Crustacean Fury 🦀', 
+    description: 'Gigantic crabs ravage the coastlines',
+    effect: async (players) => {
+      // Damage coastal units
+      for (const player of players) {
+        const coastalUnits = await Unit.findAll({ 
+          where: { 
+            PlayerId: player.playerId,
+            position: 'coast'
+          }
+        });
+        
+        if (coastalUnits.length > 0) {
+          const unitToDamage = coastalUnits[Math.floor(Math.random() * coastalUnits.length)];
+          unitToDamage.combat -= 1;
+          if (unitToDamage.combat <= 0) {
+            await unitToDamage.destroy();
+          } else {
+            await unitToDamage.save();
+          }
+        }
+      }
+    }
+  },
+  { 
+    name: 'Moving Shadows 👥', 
+    description: 'Stories of shadows lurking and whispering',
+    effect: async (players) => {
+      // Reduce mood for all players
+      for (const player of players) {
+        await player.update({ 
+          mood: Math.max(1, player.mood - 1) 
+        });
+      }
+    }
+  },
+  { 
+    name: 'Darvu Raiders', 
+    description: 'Bandits make themselves feel at home in Discordia',
+    effect: async (players) => {
+      // Steal gold from random players
+      for (let i = 0; i < Math.ceil(players.length / 3); i++) {
+        const victim = players[Math.floor(Math.random() * players.length)];
+        const stolen = Math.min(20, Math.floor(victim.gold * 0.1));
+        await victim.update({ gold: victim.gold - stolen });
+      }
+    }
+  },
+  { 
+    name: 'Pilgrims', 
+    description: 'Citizens make a pilgrimage to Discordia',
+    effect: async (players) => {
+      // Increase mood for all players
+      for (const player of players) {
+        await player.update({ 
+          mood: Math.min(5, player.mood + 1) 
+        });
+      }
+    }
+  },
+  { 
+    name: 'Void Gate 🌌', 
+    description: 'Word has spread of a Gate to the Void in the Southeast',
+    effect: async (players) => {
+      // No direct effect, just flavor
+    }
+  },
+  { 
+    name: 'Rat Infestation 🐀', 
+    description: 'Giant rats have infested the grain stores',
+    effect: async (players) => {
+      // Reduce food for all players
+      for (const player of players) {
+        await player.update({ 
+          food: Math.max(0, player.food - 1) 
+        });
+      }
+    }
+  },
+  { 
+    name: 'Earthquake 🌍', 
+    description: 'A massive earthquake shakes the land',
+    effect: async (players) => {
+      // Destroy random units
+      for (const player of players) {
+        const units = await Unit.findAll({ 
+          where: { PlayerId: player.playerId }
+        });
+        
+        if (units.length > 0) {
+          const unitToDestroy = units[Math.floor(Math.random() * units.length)];
+          await unitToDestroy.destroy();
+        }
+      }
+    }
+  },
+  { 
+    name: 'Tornado 🌪', 
+    description: 'A deadly tornado tears through the countryside',
+    effect: async (players) => {
+      // Destroy random units (higher chance than earthquake)
+      for (const player of players) {
+        const units = await Unit.findAll({ 
+          where: { PlayerId: player.playerId }
+        });
+        
+        if (units.length > 0 && Math.random() < 0.3) {
+          const unitToDestroy = units[Math.floor(Math.random() * units.length)];
+          await unitToDestroy.destroy();
+        }
+      }
+    }
+  },
+  { 
+    name: 'Wildfire 🔥', 
+    description: 'A raging wildfire consumes the forests',
+    effect: async (players) => {
+      // Damage forest units and reduce food production
+      for (const player of players) {
+        const forestUnits = await Unit.findAll({ 
+          where: { 
+            PlayerId: player.playerId,
+            position: 'forest'
+          }
+        });
+        
+        if (forestUnits.length > 0) {
+          const unitToDamage = forestUnits[Math.floor(Math.random() * forestUnits.length)];
+          unitToDamage.combat -= 1;
+          if (unitToDamage.combat <= 0) {
+            await unitToDamage.destroy();
+          } else {
+            await unitToDamage.save();
+          }
+        }
+      }
+    }
+  },
+  { 
+    name: 'Pirate Raid 🏴‍☠️', 
+    description: 'Pirates attack coastal settlements',
+    effect: async (players) => {
+      // Steal gold and damage coastal units
+      for (const player of players) {
+        const coastalUnits = await Unit.findAll({ 
+          where: { 
+            PlayerId: player.playerId,
+            position: 'coast'
+          }
+        });
+        
+        if (coastalUnits.length > 0) {
+          // Steal gold
+          const stolen = Math.min(30, Math.floor(player.gold * 0.15));
+          await player.update({ gold: player.gold - stolen });
+          
+          // Damage unit
+          const unitToDamage = coastalUnits[Math.floor(Math.random() * coastalUnits.length)];
+          unitToDamage.combat -= 2;
+          if (unitToDamage.combat <= 0) {
+            await unitToDamage.destroy();
+          } else {
+            await unitToDamage.save();
+          }
+        }
+      }
+    }
+  },
+  { 
+    name: 'Plague 💀', 
+    description: 'A deadly plague spreads through the population',
+    effect: async (players) => {
+      // Reduce population and mood
+      for (const player of players) {
+        await player.update({ 
+          population: Math.max(1, player.population - 1),
+          mood: Math.max(1, player.mood - 1)
+        });
+      }
+    }
+  }
 ];
 
 // XP required for each level
 const XP_LEVELS = [0, 100, 250, 500, 800, 1200];
+
+// Vowels and consonants for name generation
+const VOWELS = ['a', 'e', 'i', 'o', 'u'];
+const CONSONANTS = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
 
 // =====================
 // Database Models
@@ -228,6 +415,8 @@ const Player = sequelize.define('Player', {
   lastAction: DataTypes.DATE,
   distanceToMarket: { type: DataTypes.INTEGER, defaultValue: 0 },
   distanceToMountain: { type: DataTypes.INTEGER, defaultValue: 0 },
+  distanceToForest: { type: DataTypes.INTEGER, defaultValue: 0 },
+  distanceToCoast: { type: DataTypes.INTEGER, defaultValue: 0 },
   // New fields for kingdom-wide XP
   farmerXp: { type: DataTypes.INTEGER, defaultValue: 0 },
   farmerLevel: { type: DataTypes.INTEGER, defaultValue: 1 },
@@ -261,6 +450,7 @@ const Player = sequelize.define('Player', {
 
 const Unit = sequelize.define('Unit', {
   unitId: { type: DataTypes.STRING, primaryKey: true },
+  name: DataTypes.STRING,
   type: DataTypes.STRING,
   combat: DataTypes.FLOAT,
   movement: DataTypes.INTEGER,
@@ -273,7 +463,9 @@ const Unit = sequelize.define('Unit', {
   equippedWeapon: DataTypes.FLOAT,
   equippedArmor: DataTypes.FLOAT,
   visibilityThreshold: { type: DataTypes.INTEGER, defaultValue: 0 },
-  isTraveling: { type: DataTypes.BOOLEAN, defaultValue: false }
+  isTraveling: { type: DataTypes.BOOLEAN, defaultValue: false },
+  wanderingSpaces: { type: DataTypes.INTEGER, defaultValue: 0 },
+  sailingSpaces: { type: DataTypes.INTEGER, defaultValue: 0 }
 }, { timestamps: false });
 
 const Inventory = sequelize.define('Inventory', {
@@ -345,6 +537,7 @@ function getDailyEvent() {
   return {
     name: event.name,
     description: event.description,
+    effect: event.effect,
     isPublic: Math.random() > 0.3
   };
 }
@@ -353,64 +546,206 @@ function getRandomFloat(min, max, decimals = 8) {
   return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
 }
 
+function generateUnitName() {
+  // Generate a simple "vowel consonant vowel consonant vowel consonant" name
+  let name = '';
+  for (let i = 0; i < 3; i++) {
+    name += VOWELS[Math.floor(Math.random() * VOWELS.length)];
+    name += CONSONANTS[Math.floor(Math.random() * CONSONANTS.length)];
+  }
+  
+  // Check for duplicates and add number if needed
+  // (This will be handled when creating the unit)
+  return name;
+}
+
 // =================
 // Movement System
 // =================
 async function processMovement() {
   try {
     const travelingUnits = await Unit.findAll({ 
-      where: { isTraveling: true },
+      where: { 
+        [Op.or]: [
+          { isTraveling: true },
+          { wanderingSpaces: { [Op.gt]: 0 } },
+          { sailingSpaces: { [Op.gt]: 0 } }
+        ]
+      },
       include: [Player]
     });
 
     for (const unit of travelingUnits) {
-      // Get the player's distance to destination
-      const totalDistance = unit.totalDistance;
-      const distanceTraveled = unit.distanceTraveled + unit.movement;
-      
-      if (distanceTraveled >= totalDistance) {
-        // Arrived at destination
-        unit.position = unit.destination;
-        unit.destination = null;
-        unit.distanceTraveled = 0;
-        unit.totalDistance = 0;
-        unit.isTraveling = false;
+      if (unit.isTraveling) {
+        // Regular movement
+        const distanceTraveled = unit.distanceTraveled + unit.movement;
         
-        // Restore movement points
-        const player = await Player.findByPk(unit.PlayerId);
-        const levelData = SKILLS[unit.type].levels[player[`${unit.type.toLowerCase()}Level`] - 1];
-        unit.movement = levelData.m;
+        if (distanceTraveled >= unit.totalDistance) {
+          // Arrived at destination
+          unit.position = unit.destination;
+          unit.destination = null;
+          unit.distanceTraveled = 0;
+          unit.totalDistance = 0;
+          unit.isTraveling = false;
+          
+          // Restore movement points
+          const player = await Player.findByPk(unit.PlayerId);
+          const levelData = SKILLS[unit.type].levels[player[`${unit.type.toLowerCase()}Level`] - 1];
+          unit.movement = levelData.m;
+          
+          await unit.save();
+          
+          // Notify player
+          if (player) {
+            const user = await bot.users.fetch(player.playerId);
+            if (user) {
+              user.send(`Your ${unit.type} has arrived at ${unit.position}!`);
+            }
+          }
+        } else {
+          // Still traveling
+          unit.distanceTraveled = distanceTraveled;
+          await unit.save();
+        }
         
-        await unit.save();
-        
-        // Notify player
-        if (player) {
-          const user = await bot.users.fetch(player.playerId);
-          if (user) {
-            user.send(`Your ${unit.type} has arrived at ${unit.position}!`);
+        // Add XP for moving
+        await addXP(unit.PlayerId, unit.type, 2);
+      } else if (unit.wanderingSpaces > 0) {
+        // Wandering in forest
+        unit.wanderingSpaces -= unit.movement;
+        if (unit.wanderingSpaces <= 0) {
+          unit.wanderingSpaces = 0;
+          // Restore movement points
+          const player = await Player.findByPk(unit.PlayerId);
+          const levelData = SKILLS[unit.type].levels[player[`${unit.type.toLowerCase()}Level`] - 1];
+          unit.movement = levelData.m;
+          
+          // Check for monster encounter every 10 spaces
+          const totalWandered = unit.totalDistance - unit.wanderingSpaces;
+          if (totalWandered >= 10 && Math.floor(totalWandered / 10) > Math.floor((totalWandered - unit.movement) / 10)) {
+            const monsterCR = Math.floor(totalWandered / 10);
+            const combatResult = await handleCombat(unit, monsterCR, 'monster');
+            
+            if (combatResult.victory) {
+              // Reward gold
+              const reward = monsterCR * 15;
+              await Player.update({ gold: player.gold + reward }, { where: { playerId: unit.PlayerId } });
+              
+              const user = await bot.users.fetch(unit.PlayerId);
+              if (user) {
+                user.send(`Your ${unit.type} defeated a CR ${monsterCR} monster and earned ${reward}g!`);
+              }
+            } else {
+              // Unit defeated
+              const user = await bot.users.fetch(unit.PlayerId);
+              if (user) {
+                user.send(`Your ${unit.type} was defeated by a CR ${monsterCR} monster while wandering!`);
+              }
+              await unit.destroy();
+              continue; // Skip saving since unit is destroyed
+            }
           }
         }
-      } else {
-        // Still traveling
-        unit.distanceTraveled = distanceTraveled;
+        await unit.save();
+      } else if (unit.sailingSpaces > 0) {
+        // Sailing at coast
+        unit.sailingSpaces -= unit.movement;
+        if (unit.sailingSpaces <= 0) {
+          unit.sailingSpaces = 0;
+          // Restore movement points
+          const player = await Player.findByPk(unit.PlayerId);
+          const levelData = SKILLS[unit.type].levels[player[`${unit.type.toLowerCase()}Level`] - 1];
+          unit.movement = levelData.m;
+          
+          // Check for rewards and encounters
+          const totalSailed = unit.totalDistance - unit.sailingSpaces;
+          
+          // 10% chance every 20 spaces for food
+          if (totalSailed >= 20 && Math.floor(totalSailed / 20) > Math.floor((totalSailed - unit.movement) / 20)) {
+            if (Math.random() < 0.1) {
+              await addToInventory(unit.PlayerId, 'food', 1);
+              const user = await bot.users.fetch(unit.PlayerId);
+              if (user) {
+                user.send(`Your ${unit.type} found 1 food while sailing!`);
+              }
+            }
+          }
+          
+          // 1% chance every 30 spaces for gem
+          if (totalSailed >= 30 && Math.floor(totalSailed / 30) > Math.floor((totalSailed - unit.movement) / 30)) {
+            if (Math.random() < 0.01) {
+              await addToInventory(unit.PlayerId, 'gem', 1);
+              const user = await bot.users.fetch(unit.PlayerId);
+              if (user) {
+                user.send(`Your ${unit.type} found 1 gem while sailing!`);
+              }
+            }
+          }
+          
+          // Pirate attack chance for sailing 30+ spaces
+          if (totalSailed >= 30 && Math.random() < 0.2) {
+            const pirateCR = Math.floor(Math.random() * 5) + 1;
+            const combatResult = await handleCombat(unit, pirateCR, 'pirate');
+            
+            if (combatResult.victory) {
+              const user = await bot.users.fetch(unit.PlayerId);
+              if (user) {
+                user.send(`Your ${unit.type} defeated pirate attackers (CR ${pirateCR}) while sailing!`);
+              }
+            } else {
+              // Unit defeated
+              const user = await bot.users.fetch(unit.PlayerId);
+              if (user) {
+                user.send(`Your ${unit.type} was defeated by pirates (CR ${pirateCR}) while sailing!`);
+              }
+              await unit.destroy();
+              continue; // Skip saving since unit is destroyed
+            }
+          }
+        }
         await unit.save();
       }
-      
-      // Add XP for moving
-      await addXP(unit.PlayerId, unit.type, 2);
     }
   } catch (error) {
     console.error('Movement processing error:', error);
   }
 }
 
+async function handleCombat(unit, enemyCR, enemyType) {
+  const player = await Player.findByPk(unit.PlayerId);
+  const unitCR = unit.combat + (unit.equippedWeapon || 0);
+  
+  // Calculate combat result
+  const playerRoll = Math.random() * unitCR;
+  const enemyRoll = Math.random() * enemyCR;
+  
+  if (playerRoll > enemyRoll) {
+    // Victory
+    unit.combat -= enemyCR * 0.2; // Take some damage
+    if (unit.combat <= 0) {
+      await unit.destroy();
+      return { victory: false };
+    } else {
+      await unit.save();
+      return { victory: true };
+    }
+  } else {
+    // Defeat
+    await unit.destroy();
+    return { victory: false };
+  }
+}
+
 function getMovementCost(from, to, unitType) {
   // Special movement costs based on terrain and unit type
-  if (to === 'water') {
+  if (to === 'water' || to === 'coast') {
     return unitType === 'Merfolk' || unitType === 'Kappa' ? 2 : 3;
   }
   if (to === 'mountain') {
     return unitType === 'Avian' ? 2 : 3;
+  }
+  if (to === 'forest') {
+    return unitType === 'Elf' || unitType === 'Treefolk' || unitType === 'Xathri' ? 1 : 2;
   }
   return 1; // Default movement cost
 }
@@ -467,6 +802,8 @@ async function handleSetupCommand(message) {
     const gold = 80 + (playerCount * 10) + Math.floor(Math.random() * 41);
     const distanceToMarket = 8 + Math.floor(Math.random() * 5); // 8-12
     const distanceToMountain = 5 + Math.floor(Math.random() * 6); // 5-10
+    const distanceToForest = 3 + Math.floor(Math.random() * 5); // 3-7
+    const distanceToCoast = 6 + Math.floor(Math.random() * 5); // 6-10
 
     const player = await Player.create({
       playerId: message.author.id,
@@ -477,6 +814,8 @@ async function handleSetupCommand(message) {
       gold,
       distanceToMarket,
       distanceToMountain,
+      distanceToForest,
+      distanceToCoast,
       turnOrder: playerCount + 1
     });
 
@@ -490,7 +829,7 @@ async function handleSetupCommand(message) {
         { name: 'Race', value: `${race} - ${RACES[race].bonus}\n*${RACES[race].effect}*`, inline: true },
         { name: 'Skills', value: `${skill1}${SKILLS[skill1].emoji} & ${skill2}${SKILLS[skill2].emoji}`, inline: true },
         { name: 'Starting Resources', value: `Gold: ${gold}g\nPopulation: 3\nMood: 3\nFood: 3`, inline: false },
-        { name: 'Distances', value: `Market: ${distanceToMarket} spaces\nMountain: ${distanceToMountain} spaces`, inline: false }
+        { name: 'Distances', value: `Market: ${distanceToMarket} spaces\nMountain: ${distanceToMountain} spaces\nForest: ${distanceToForest} spaces\nCoast: ${distanceToCoast} spaces`, inline: false }
       );
 
     message.reply({ embeds: [embed] });
@@ -504,12 +843,30 @@ async function createUnit(playerId, unitType) {
   const player = await Player.findByPk(playerId);
   if (!player) return null;
   
+  // Check unit limit
+  const unitCount = await Unit.count({ where: { PlayerId: playerId } });
+  if (unitCount >= 12) {
+    return null;
+  }
+  
   const level = player[`${unitType.toLowerCase()}Level`];
   const skill = SKILLS[unitType];
   const levelData = skill.levels[level - 1];
   
+  // Generate unique name
+  let name = generateUnitName();
+  let nameExists = await Unit.findOne({ where: { name } });
+  let nameSuffix = 2;
+  
+  while (nameExists) {
+    name = `${generateUnitName()}${nameSuffix}`;
+    nameExists = await Unit.findOne({ where: { name } });
+    nameSuffix++;
+  }
+  
   const unit = await Unit.create({
     unitId: `unit_${Date.now()}`,
+    name,
     PlayerId: playerId,
     type: unitType,
     combat: levelData.c,
@@ -535,14 +892,25 @@ async function handleTrainCommand(message, args) {
       return message.reply(`Invalid unit type. Available types: ${Object.keys(SKILLS).join(', ')}`);
     }
 
-    if (player.food < 1) {
-      return message.reply('You need at least 1 food to train a unit');
+    if (player.food < 3) {
+      return message.reply('You need at least 3 food to train a unit');
     }
 
-    await player.update({ food: player.food - 1 });
+    // Check unit limit
+    const unitCount = await Unit.count({ where: { PlayerId: player.playerId } });
+    if (unitCount >= 12) {
+      return message.reply('You have reached the maximum of 12 units');
+    }
+
+    await player.update({ food: player.food - 3 });
     const unit = await createUnit(player.playerId, unitType);
 
-    message.reply(`Trained a new ${unitType}${SKILLS[unitType].emoji}!`);
+    if (!unit) {
+      await player.update({ food: player.food + 3 }); // Refund if couldn't create
+      return message.reply('Failed to create unit (possibly reached maximum units)');
+    }
+
+    message.reply(`Trained a new ${unitType}${SKILLS[unitType].emoji} named ${unit.name}!`);
   } catch (error) {
     console.error('Train error:', error);
     message.reply('Error training unit');
@@ -581,7 +949,7 @@ async function handleStatusCommand(message) {
         { name: 'Race', value: player.race, inline: true },
         { name: 'Skills', value: `${player.skill1}${SKILLS[player.skill1]?.emoji || ''}\n${player.skill2}${SKILLS[player.skill2]?.emoji || ''}`, inline: true },
         { name: 'Resources', value: `Gold: ${player.gold}g\nPopulation: ${player.population}\nMood: ${player.mood}/5\nFood: ${player.food}`, inline: true },
-        { name: 'Distances', value: `Market: ${player.distanceToMarket} spaces\nMountain: ${player.distanceToMountain} spaces`, inline: true },
+        { name: 'Distances', value: `Market: ${player.distanceToMarket} spaces\nMountain: ${player.distanceToMountain} spaces\nForest: ${player.distanceToForest} spaces\nCoast: ${player.distanceToCoast} spaces`, inline: true },
         { name: 'Units', value: unitList || 'None', inline: false },
         { name: 'Inventory', value: inventoryList, inline: false }
       );
@@ -605,11 +973,17 @@ async function handleUnitsCommand(message) {
     }
 
     const unitList = player.Units.map(unit => {
-      let info = `${unit.unitId}: ${unit.type}${SKILLS[unit.type]?.emoji || ''} (Lvl ${player[`${unit.type.toLowerCase()}Level`]})`;
+      let info = `${unit.name} (${unit.unitId}): ${unit.type}${SKILLS[unit.type]?.emoji || ''} (Lvl ${player[`${unit.type.toLowerCase()}Level`]})`;
       info += `\n- Combat: ${unit.combat.toFixed(2)} | Movement: ${unit.movement}`;
       info += `\n- Position: ${unit.position}`;
       if (unit.isTraveling) {
         info += ` (Traveling to ${unit.destination}, ${unit.distanceTraveled}/${unit.totalDistance} spaces)`;
+      }
+      if (unit.wanderingSpaces > 0) {
+        info += ` (Wandering in forest, ${unit.wanderingSpaces} spaces left)`;
+      }
+      if (unit.sailingSpaces > 0) {
+        info += ` (Sailing at coast, ${unit.sailingSpaces} spaces left)`;
       }
       if (unit.equippedWeapon > 0) {
         info += `\n- Weapon: +${unit.equippedWeapon.toFixed(2)} combat`;
@@ -697,6 +1071,9 @@ async function handleDailyUpdate() {
     const date = getCurrentDate();
     const event = getDailyEvent();
 
+    // Apply event effects
+    await event.effect(players);
+
     for (const player of players) {
       let populationChange = 0;
       if (player.mood === 5) populationChange += 1;
@@ -743,11 +1120,13 @@ async function handleFarmCommand(message) {
     // Find the first available farmer
     const farmer = player.Units.find(u => 
       u.type === 'Farmer' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!farmer) return message.reply('No available farmers (must wait 5 minutes between actions or unit is traveling)');
+    if (!farmer) return message.reply('No available farmers (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Farmer.levels[player.farmerLevel - 1];
     const roll = Math.random() * 100;
@@ -793,11 +1172,13 @@ async function handleHuntCommand(message) {
     // Find the first available hunter
     const hunter = player.Units.find(u => 
       u.type === 'Hunter' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!hunter) return message.reply('No available hunters (must wait 5 minutes between actions or unit is traveling)');
+    if (!hunter) return message.reply('No available hunters (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Hunter.levels[player.hunterLevel - 1];
     const roll = Math.random() * 100;
@@ -843,12 +1224,14 @@ async function handleMineCommand(message) {
     // Find the first available miner on a mountain
     const miner = player.Units.find(u => 
       u.type === 'Miner' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
       u.position === 'mountain' &&
-      !u.isTraveling
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!miner) return message.reply('No available miners on mountain spaces (must wait 5 minutes between actions or unit is traveling)');
+    if (!miner) return message.reply('No available miners on mountain spaces (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Miner.levels[player.minerLevel - 1];
     const roll = Math.random() * 100;
@@ -917,13 +1300,24 @@ async function handleSmithCommand(message, args) {
     // Find the first available smith
     const smith = player.Units.find(u => 
       u.type === 'Smith' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!smith) return message.reply('No available smiths (must wait 5 minutes between actions or unit is traveling)');
+    if (!smith) return message.reply('No available smiths (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Smith.levels[player.smithLevel - 1];
+    
+    // Check if smithing succeeds
+    if (Math.random() * 100 > levelData.produce.successRate) {
+      message.reply('Your smith failed to create anything this time.');
+      await addXP(player.playerId, 'Smith', 16);
+      smith.lastAction = new Date();
+      await smith.save();
+      return;
+    }
     
     const baseValue = getRandomFloat(levelData.produce.minValue, levelData.produce.maxValue);
     
@@ -976,11 +1370,13 @@ async function handleInventCommand(message) {
     // Find the first available inventor
     const inventor = player.Units.find(u => 
       u.type === 'Inventor' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!inventor) return message.reply('No available inventors (must wait 5 minutes between actions or unit is traveling)');
+    if (!inventor) return message.reply('No available inventors (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Inventor.levels[player.inventorLevel - 1];
     const roll = Math.random() * 100;
@@ -1020,11 +1416,13 @@ async function handleMonkCommand(message) {
     // Find the first available monk
     const monk = player.Units.find(u => 
       u.type === 'Monk' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!monk) return message.reply('No available monks (must wait 5 minutes between actions or unit is traveling)');
+    if (!monk) return message.reply('No available monks (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Monk.levels[player.monkLevel - 1];
     const roll = Math.random() * 100;
@@ -1064,12 +1462,14 @@ async function handleMerchantCommand(message) {
     // Find the first available merchant at market
     const merchant = player.Units.find(u => 
       u.type === 'Merchant' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
       u.position === 'market' &&
-      !u.isTraveling
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!merchant) return message.reply('No available merchants at market (must wait 5 minutes between actions or unit is traveling)');
+    if (!merchant) return message.reply('No available merchants at market (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Merchant.levels[player.merchantLevel - 1];
     const roll = Math.random() * 100;
@@ -1109,11 +1509,13 @@ async function handleEntertainCommand(message) {
     // Find the first available entertainer
     const entertainer = player.Units.find(u => 
       u.type === 'Entertainer' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!entertainer) return message.reply('No available entertainers (must wait 5 minutes between actions or unit is traveling)');
+    if (!entertainer) return message.reply('No available entertainers (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Entertainer.levels[player.entertainerLevel - 1];
     const roll = Math.random() * 100;
@@ -1153,11 +1555,13 @@ async function handleMedicCommand(message) {
     // Find the first available medic
     const medic = player.Units.find(u => 
       u.type === 'Medic' && 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 5 * 60 * 1000) &&
-      !u.isTraveling
+      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+      !u.isTraveling &&
+      u.wanderingSpaces === 0 &&
+      u.sailingSpaces === 0
     );
     
-    if (!medic) return message.reply('No available medics (must wait 5 minutes between actions or unit is traveling)');
+    if (!medic) return message.reply('No available medics (must wait 15 minutes between actions or unit is traveling/wandering/sailing)');
 
     const levelData = SKILLS.Medic.levels[player.medicLevel - 1];
     const roll = Math.random() * 100;
@@ -1188,6 +1592,74 @@ async function handleMedicCommand(message) {
 }
 
 // =================
+// New Location Commands
+// =================
+async function handleWanderCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const unitId = args[0];
+    const spaces = parseInt(args[1]) || 10;
+
+    if (!unitId) return message.reply('Specify a unit ID to wander. Use !units to see your units.');
+    if (spaces <= 0) return message.reply('You must wander at least 1 space.');
+
+    const unit = player.Units.find(u => u.unitId === unitId);
+    if (!unit) return message.reply('Unit not found');
+    if (unit.position !== 'forest') return message.reply('Unit must be in the forest to wander');
+    if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
+      return message.reply('This unit is already moving or wandering/sailing');
+    }
+
+    // Start wandering
+    unit.wanderingSpaces = spaces;
+    unit.totalDistance = spaces;
+    await unit.save();
+
+    message.reply(`Your ${unit.type} named ${unit.name} is now wandering in the forest for ${spaces} spaces.`);
+  } catch (error) {
+    console.error('Wander error:', error);
+    message.reply('Error processing wander command');
+  }
+}
+
+async function handleSailCommand(message, args) {
+  try {
+    const player = await Player.findByPk(message.author.id, {
+      include: [Unit]
+    });
+    if (!player) return message.reply('Use !setup first');
+
+    const unitId = args[0];
+    const spaces = parseInt(args[1]) || 10;
+
+    if (!unitId) return message.reply('Specify a unit ID to sail. Use !units to see your units.');
+    if (spaces <= 0) return message.reply('You must sail at least 1 space.');
+    if (spaces > 100) return message.reply('You cannot sail more than 100 spaces at once.');
+
+    const unit = player.Units.find(u => u.unitId === unitId);
+    if (!unit) return message.reply('Unit not found');
+    if (unit.position !== 'coast') return message.reply('Unit must be at the coast to sail');
+    if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
+      return message.reply('This unit is already moving or wandering/sailing');
+    }
+
+    // Start sailing
+    unit.sailingSpaces = spaces;
+    unit.totalDistance = spaces;
+    await unit.save();
+
+    message.reply(`Your ${unit.type} named ${unit.name} is now sailing for ${spaces} spaces.`);
+  } catch (error) {
+    console.error('Sail error:', error);
+    message.reply('Error processing sail command');
+  }
+}
+
+// =================
 // Item Commands
 // =================
 async function handleItemCommand(message, args) {
@@ -1198,7 +1670,7 @@ async function handleItemCommand(message, args) {
     if (!player) return message.reply('Use !setup first');
 
     const itemType = args[0]?.toLowerCase();
-    if (!itemType) return message.reply('Specify an item to use (trinket, beer_barrel, art, medicine)');
+    if (!itemType) return message.reply('Specify an item to use (trinket, beer_barrel, art, medicine, tea)');
 
     const item = player.Inventories.find(i => i.itemType === itemType);
     if (!item || item.quantity < 1) {
@@ -1226,6 +1698,10 @@ async function handleItemCommand(message, args) {
       case 'medicine':
         await player.update({ medicineActive: true });
         effect = 'Your units will heal 1 HP after their next battle!';
+        break;
+      case 'tea':
+        await player.update({ mood: Math.min(5, player.mood + 1) });
+        effect = 'The tea improved your kingdom\'s mood by 1!';
         break;
       default:
         return message.reply('This item cannot be used directly');
@@ -1297,10 +1773,10 @@ async function handleEquipCommand(message, args) {
     // Equip the item
     if (equipType === 'weapon') {
       unit.equippedWeapon = selectedItem.value;
-      await message.reply(`Equipped weapon with +${selectedItem.value.toFixed(2)} combat to your ${unit.type}!`);
+      await message.reply(`Equipped weapon with +${selectedItem.value.toFixed(2)} combat to your ${unit.type} named ${unit.name}!`);
     } else {
       unit.equippedArmor = selectedItem.value;
-      await message.reply(`Equipped armor with +${selectedItem.value.toFixed(2)} defense to your ${unit.type}!`);
+      await message.reply(`Equipped armor with +${selectedItem.value.toFixed(2)} defense to your ${unit.type} named ${unit.name}!`);
     }
     
     await unit.save();
@@ -1325,12 +1801,12 @@ async function handleMoveCommand(message, args) {
     const destination = args[1]?.toLowerCase();
 
     if (!unitId || !destination) {
-      return message.reply('Usage: !move <unitId> <destination> (market, mountain, capital)');
+      return message.reply('Usage: !move <unitId> <destination> (market, mountain, forest, coast, capital)');
     }
 
-    const validDestinations = ['market', 'mountain', 'capital'];
+    const validDestinations = ['market', 'mountain', 'forest', 'coast', 'capital'];
     if (!validDestinations.includes(destination)) {
-      return message.reply('Invalid destination. Must be market, mountain, or capital');
+      return message.reply('Invalid destination. Must be market, mountain, forest, coast, or capital');
     }
 
     const unit = player.Units.find(u => u.unitId === unitId);
@@ -1340,8 +1816,8 @@ async function handleMoveCommand(message, args) {
       return message.reply(`This unit is already at ${destination}`);
     }
 
-    if (unit.isTraveling) {
-      return message.reply('This unit is already traveling');
+    if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
+      return message.reply('This unit is already moving or wandering/sailing');
     }
 
     // Calculate distance to destination
@@ -1350,13 +1826,21 @@ async function handleMoveCommand(message, args) {
       distance = player.distanceToMarket;
     } else if (destination === 'mountain') {
       distance = player.distanceToMountain;
+    } else if (destination === 'forest') {
+      distance = player.distanceToForest;
+    } else if (destination === 'coast') {
+      distance = player.distanceToCoast;
     } else { // capital
       // If already at capital, we wouldn't get here (position check above)
-      // If at market or mountain, distance back to capital is same as distance out
+      // If at other locations, distance back to capital is same as distance out
       if (unit.position === 'market') {
         distance = player.distanceToMarket;
       } else if (unit.position === 'mountain') {
         distance = player.distanceToMountain;
+      } else if (unit.position === 'forest') {
+        distance = player.distanceToForest;
+      } else if (unit.position === 'coast') {
+        distance = player.distanceToCoast;
       } else {
         distance = 0;
       }
@@ -1380,7 +1864,7 @@ async function handleMoveCommand(message, args) {
 
     // Calculate time to arrive (1 space per minute per movement point)
     const minutes = Math.ceil(distance / unit.movement);
-    message.reply(`Your ${unit.type} is now traveling to ${destination}. ETA: ${minutes} minute(s)`);
+    message.reply(`Your ${unit.type} named ${unit.name} is now traveling to ${destination}. ETA: ${minutes} minute(s)`);
     
     // Add XP for starting movement
     await addXP(player.playerId, unit.type, 2);
@@ -1472,7 +1956,14 @@ async function handleBuyCommand(message, args) {
     const quantity = parseInt(args[1]) || 1;
 
     if (!item || !MARKET_PRICES[item]) {
-      return message.reply(`Available items: ${Object.keys(MARKET_PRICES).join(', ')}`);
+      const priceList = Object.entries(MARKET_PRICES).map(([item, prices]) => {
+        if (typeof prices.buy === 'function') {
+          return `${item}: price varies by quality`;
+        } else {
+          return `${item}: ${prices.buy}g to buy, ${prices.sell}g to sell`;
+        }
+      }).join('\n');
+      return message.reply(`Available items and prices:\n${priceList}`);
     }
 
     const price = typeof MARKET_PRICES[item].buy === 'function' 
@@ -1559,7 +2050,9 @@ async function handleAttackCommand(message, args) {
     if (!attacker) return message.reply('Attacker not found');
 
     if (attacker.combat <= 0) return message.reply('This unit cannot attack (0 combat value)');
-    if (attacker.isTraveling) return message.reply('This unit is traveling and cannot attack');
+    if (attacker.isTraveling || attacker.wanderingSpaces > 0 || attacker.sailingSpaces > 0) {
+      return message.reply('This unit is traveling/wandering/sailing and cannot attack');
+    }
 
     // Check if attacker has enough movement (attacking costs 1 movement)
     if (attacker.movement < 1) {
@@ -1589,7 +2082,7 @@ async function handleAttackCommand(message, args) {
       targetUnit.combat -= damage;
       if (targetUnit.combat <= 0) {
         await targetUnit.destroy();
-        message.reply(`Your ${attacker.type} defeated the enemy ${targetUnit.type}!`);
+        message.reply(`Your ${attacker.type} named ${attacker.name} defeated the enemy ${targetUnit.type}!`);
         
         // Special effects (Vampirian)
         if (player.race === 'Vampirian') {
@@ -1598,7 +2091,7 @@ async function handleAttackCommand(message, args) {
         }
       } else {
         await targetUnit.save();
-        message.reply(`Your ${attacker.type} dealt ${damage.toFixed(2)} damage to enemy ${targetUnit.type} (remaining: ${targetUnit.combat.toFixed(2)})`);
+        message.reply(`Your ${attacker.type} named ${attacker.name} dealt ${damage.toFixed(2)} damage to enemy ${targetUnit.type} (remaining: ${targetUnit.combat.toFixed(2)})`);
       }
     } else if (targetType === 'kingdom') {
       // Find target player
@@ -1613,7 +2106,7 @@ async function handleAttackCommand(message, args) {
       await targetPlayer.update({ 
         mood: Math.max(1, targetPlayer.mood - damage) 
       });
-      message.reply(`Your ${attacker.type} raided ${targetPlayer.username}'s kingdom, reducing their mood by ${damage}`);
+      message.reply(`Your ${attacker.type} named ${attacker.name} raided ${targetPlayer.username}'s kingdom, reducing their mood by ${damage}`);
     } else {
       return message.reply('Invalid target type (must be unit or kingdom)');
     }
@@ -1692,6 +2185,8 @@ bot.on('messageCreate', async message => {
     else if (command === 'buy') await handleBuyCommand(message, args);
     else if (command === 'sell') await handleSellCommand(message, args);
     else if (command === 'move') await handleMoveCommand(message, args);
+    else if (command === 'wander') await handleWanderCommand(message, args);
+    else if (command === 'sail') await handleSailCommand(message, args);
     else if (command === 'attack') await handleAttackCommand(message, args);
     else if (command === 'item') await handleItemCommand(message, args);
     else if (command === 'equip') await handleEquipCommand(message, args);
@@ -1704,7 +2199,7 @@ Available commands:
 !units - List all your units with details
 !inventory - View your detailed inventory
 !levels - View your skill levels and XP
-!train <type> - Train a new unit (costs 1 food)
+!train <type> - Train a new unit (costs 3 food)
 !farm - Have a farmer produce food
 !hunt - Have a hunter produce food
 !mine - Have a miner produce ore/gems
@@ -1716,9 +2211,11 @@ Available commands:
 !medic - Have a medic produce medicine
 !buy <item> [quantity] - Buy from market
 !sell <item> [quantity] - Sell to market
-!move <unitId> <destination> - Move unit (market/mountain/capital)
+!move <unitId> <destination> - Move unit (market/mountain/forest/coast/capital)
+!wander <unitId> [spaces] - Wander in forest (chance to encounter monsters)
+!sail <unitId> [spaces] - Sail at coast (chance to find resources or encounter pirates)
 !attack <unitId> <unit|kingdom> <targetId> - Attack
-!item <item> - Use an item (trinket, beer_barrel, art, medicine)
+!item <item> - Use an item (trinket, beer_barrel, art, medicine, tea)
 !equip <unitId> <weapon|armor> - Equip items to units
 !YesIReallyWantToResetMyKingdom - Reset kingdom
       `);
