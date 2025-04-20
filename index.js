@@ -2151,75 +2151,109 @@ async function confirmAction(message, question) {
 
 async function handleRollAllCommand(message) {
   try {
+    console.log('Command received from', message.author.id);
+    
     const player = await Player.findByPk(message.author.id, {
       include: [Unit, Inventory]
     });
-    if (!player) return message.reply('Use !setup first');
+    
+    if (!player) {
+      console.log('No player found');
+      return message.reply('Use !setup first');
+    }
 
-    const availableUnits = player.Units.filter(u => 
-      (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
-      !u.isTraveling &&
-      u.wanderingSpaces === 0 &&
-      u.sailingSpaces === 0
-    );
+    console.log(`Found player with ${player.Units?.length} units`);
+    
+    const availableUnits = player.Units.filter(u => {
+      const isAvailable = (!u.lastAction || Date.now() - u.lastAction.getTime() > 15 * 60 * 1000) &&
+                         !u.isTraveling &&
+                         u.wanderingSpaces === 0 &&
+                         u.sailingSpaces === 0;
+      console.log(`Unit ${u.name} available: ${isAvailable}`);
+      return isAvailable;
+    });
 
+    console.log(`Available units: ${availableUnits.length}`);
+    
     if (availableUnits.length === 0) {
-      return message.reply('No available units to perform actions');
+      return message.reply('No available units to perform actions. Units may be on cooldown, traveling, or occupied.');
     }
 
     let results = [];
     for (const unit of availableUnits) {
-      let result = `${unit.name} (${unit.type}): `;
-      
-      if (unit.type === 'Smith') {
-        // Randomly decide to make weapon or armor
-        const itemType = Math.random() < 0.5 ? 'weapon' : 'armor';
-        const levelData = SKILLS.Smith.levels[player.smithLevel - 1];
+      try {
+        console.log(`Processing unit ${unit.name} (${unit.type})`);
+        let result = `${unit.name} (${unit.type}): `;
         
-        if (Math.random() * 100 > levelData.produce.successRate) {
-          result += 'Failed to create anything';
-        } else {
-          const baseValue = getRandomFloat(levelData.produce.minValue, levelData.produce.maxValue);
-          await addToInventory(player.playerId, itemType, 1, baseValue);
-          result += `Created ${itemType} with value ${baseValue.toFixed(2)}`;
-        }
-      } else if (SKILLS[unit.type]?.levels[0]?.produce) {
-        const level = player[`${unit.type.toLowerCase()}Level`];
-        const levelData = SKILLS[unit.type].levels[level - 1];
-        const roll = Math.random() * 100;
-        let produced = 0;
-
-        for (const [amount, chance] of levelData.produce.chances) {
-          if (roll <= chance) {
-            produced = amount;
-            break;
+        if (unit.type === 'Smith') {
+          const itemType = Math.random() < 0.5 ? 'weapon' : 'armor';
+          const levelData = SKILLS.Smith.levels[player.smithLevel - 1];
+          
+          if (!levelData) {
+            result += 'Invalid smith level';
+            continue;
           }
-        }
 
-        if (produced > 0) {
-          if (levelData.produce.item === 'gold') {
-            await player.update({ gold: player.gold + produced });
-            result += `Earned ${produced}g`;
+          if (Math.random() * 100 > levelData.produce.successRate) {
+            result += 'Failed to create anything';
           } else {
-            await addToInventory(player.playerId, levelData.produce.item, produced);
-            result += `Produced ${produced} ${levelData.produce.item}`;
+            const baseValue = getRandomFloat(levelData.produce.minValue, levelData.produce.maxValue);
+            await addToInventory(player.playerId, itemType, 1, baseValue);
+            result += `Created ${itemType} with value ${baseValue.toFixed(2)}`;
+          }
+        } else if (SKILLS[unit.type]?.levels[0]?.produce) {
+          const level = player[`${unit.type.toLowerCase()}Level`];
+          if (!level) {
+            result += 'No skill level';
+            continue;
+          }
+
+          const levelData = SKILLS[unit.type].levels[level - 1];
+          if (!levelData) {
+            result += 'Invalid skill level';
+            continue;
+          }
+
+          const roll = Math.random() * 100;
+          let produced = 0;
+
+          for (const [amount, chance] of levelData.produce.chances) {
+            if (roll <= chance) {
+              produced = amount;
+              break;
+            }
+          }
+
+          if (produced > 0) {
+            if (levelData.produce.item === 'gold') {
+              await player.increment('gold', { by: produced });
+              result += `Earned ${produced}g`;
+            } else {
+              await addToInventory(player.playerId, levelData.produce.item, produced);
+              result += `Produced ${produced} ${levelData.produce.item}`;
+            }
+          } else {
+            result += 'Produced nothing';
           }
         } else {
-          result += 'Produced nothing';
+          result += 'No production ability';
         }
-      } else {
-        result += 'No production ability';
-      }
 
-      unit.lastAction = new Date();
-      await unit.save();
-      results.push(result);
+        unit.lastAction = new Date();
+        await unit.save();
+        results.push(result);
+        console.log(`Unit ${unit.name} result: ${result}`);
+      } catch (unitError) {
+        console.error(`Error processing unit ${unit.name}:`, unitError);
+        results.push(`${unit.name}: Error processing action`);
+      }
     }
 
-    message.reply(`Rolled all units:\n${results.join('\n')}`);
+    console.log('Sending results to player');
+    await message.reply(`Rolled all units:\n${results.join('\n')}`);
   } catch (error) {
     console.error('RollAll error:', error);
-    message.reply('Error processing rollall command');
+    message.reply('Error processing rollall command').catch(e => console.error('Failed to send error message:', e));
   }
 }
 
