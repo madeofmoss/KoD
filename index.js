@@ -1117,6 +1117,50 @@ async function handleStatusCommand(message) {
   }
 }
 
+async function handleHotPotatoCommand(message) {
+    try {
+        const player = await Player.findByPk(message.author.id);
+        if (!player) return message.reply('Use !setup first');
+
+        const roll = Math.random() * 100; // Random number between 0-100
+        let result;
+
+        if (roll <= 90) { // 90% chance
+            await player.increment('gold', { by: 1 });
+            result = "You got 1 gold!";
+        } 
+        else if (roll <= 96) { // 6% chance (90-96)
+            await player.increment('gold', { by: 2 });
+            result = "You got 2 gold!";
+        } 
+        else if (roll <= 98) { // 2% chance (96-98)
+            await player.increment('gold', { by: 5 });
+            result = "You got 5 gold! Jackpot!";
+        } 
+        else if (roll <= 99) { // 1% chance (98-99)
+            await player.increment('gold', { by: 10 });
+            result = "You got 10 gold! MEGA JACKPOT!";
+        } 
+        else { // 1% chance (99-100)
+            await player.update({ population: Math.max(1, player.population - 1) });
+            result = "Oh no! The potato was too hot! You lost 1 population.";
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle('🔥 Hot Potato Result 🔥')
+            .setDescription(result)
+            .addFields(
+                { name: 'Current Gold', value: `${player.gold}g`, inline: true },
+                { name: 'Current Population', value: player.population.toString(), inline: true }
+            );
+
+        message.reply({ embeds: [embed] });
+    } catch (error) {
+        console.error('Hot Potato error:', error);
+        message.reply('Error processing hot potato command');
+    }
+}
+
 async function handleUnitsCommand(message) {
   try {
     const player = await Player.findByPk(message.author.id, {
@@ -2616,6 +2660,7 @@ bot.on('messageCreate', async message => {
     else if (command === 'item') await handleItemCommand(message, args);
     else if (command === 'equip') await handleEquipCommand(message, args);
     else if (command === 'rollall') await handleRollAllCommand(message, args);
+    else if (command === 'hotpotato') await handleHotPotatoCommand(message, args);
     else if (command === 'yesireallywanttoresetmykingdom') await handleResetCommand(message);
     else if (command === 'commands') {
       message.reply(`
