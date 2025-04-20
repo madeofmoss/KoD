@@ -1804,16 +1804,36 @@ async function handleWanderCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const unitName = args.slice(0, -1).join(' ');
-    const spaces = parseInt(args[args.length - 1]) || 10;
-
+    if (args.length < 1) return message.reply('Usage: !wander <unitName> [spaces]');
+    
+    // Parse arguments - unit name could be multiple words
+    let spaces = 10; // Default
+    let unitNameParts = args;
+    
+    // Check if last argument is a number (spaces)
+    if (!isNaN(parseInt(args[args.length - 1]))) {
+      spaces = parseInt(args.pop());
+      if (spaces <= 0) return message.reply('You must wander at least 1 space.');
+      if (spaces > 100) return message.reply('You cannot wander more than 100 spaces at once.');
+    }
+    
+    const unitName = unitNameParts.join(' ');
     if (!unitName) return message.reply('Specify a unit name to wander. Use !units to see your units.');
-    if (spaces <= 0) return message.reply('You must wander at least 1 space.');
 
     const unit = player.Units.find(u => u.name.toLowerCase() === unitName.toLowerCase());
     if (!unit) return message.reply(`Unit "${unitName}" not found`);
     
-    // [Rest of wander command implementation...]
+    if (unit.position !== 'forest') return message.reply('Unit must be in the forest to wander');
+    if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
+      return message.reply('This unit is already moving or wandering/sailing');
+    }
+
+    // Start wandering
+    unit.wanderingSpaces = spaces;
+    unit.totalDistance = spaces;
+    await unit.save();
+
+    message.reply(`Your ${unit.type} named ${unit.name} is now wandering in the forest for ${spaces} spaces.`);
   } catch (error) {
     console.error('Wander error:', error);
     message.reply('Error processing wander command');
@@ -1827,15 +1847,25 @@ async function handleSailCommand(message, args) {
     });
     if (!player) return message.reply('Use !setup first');
 
-    const unitName = args.join(' ');
-    const spaces = parseInt(args[args.length - 1]) || 10;
-
+    if (args.length < 1) return message.reply('Usage: !sail <unitName> [spaces]');
+    
+    // Parse arguments - unit name could be multiple words
+    let spaces = 10; // Default
+    let unitNameParts = args;
+    
+    // Check if last argument is a number (spaces)
+    if (!isNaN(parseInt(args[args.length - 1]))) {
+      spaces = parseInt(args.pop());
+      if (spaces <= 0) return message.reply('You must sail at least 1 space.');
+      if (spaces > 100) return message.reply('You cannot sail more than 100 spaces at once.');
+    }
+    
+    const unitName = unitNameParts.join(' ');
     if (!unitName) return message.reply('Specify a unit name to sail. Use !units to see your units.');
-    if (spaces <= 0) return message.reply('You must sail at least 1 space.');
-    if (spaces > 100) return message.reply('You cannot sail more than 100 spaces at once.');
 
     const unit = player.Units.find(u => u.name.toLowerCase() === unitName.toLowerCase());
-    if (!unit) return message.reply('Unit not found');
+    if (!unit) return message.reply(`Unit "${unitName}" not found`);
+    
     if (unit.position !== 'coast') return message.reply('Unit must be at the coast to sail');
     if (unit.isTraveling || unit.wanderingSpaces > 0 || unit.sailingSpaces > 0) {
       return message.reply('This unit is already moving or wandering/sailing');
@@ -2185,15 +2215,27 @@ async function handleRollAllCommand(message) {
         console.log(`Processing unit ${unit.name} (${unit.type})`);
         let result = `${unit.name} (${unit.type}): `;
         
+        // Get the player's skill level for this unit type
+        const skillLevel = player[`${unit.type.toLowerCase()}Level`] || 1;
+        const skillData = SKILLS[unit.type];
+        
+        if (!skillData) {
+          result += 'Unknown unit type';
+          results.push(result);
+          continue;
+        }
+
+        const levelData = skillData.levels[skillLevel - 1];
+        
+        if (!levelData) {
+          result += 'Invalid skill level';
+          results.push(result);
+          continue;
+        }
+
         if (unit.type === 'Smith') {
           const itemType = Math.random() < 0.5 ? 'weapon' : 'armor';
-          const levelData = SKILLS.Smith.levels[player.smithLevel - 1];
           
-          if (!levelData) {
-            result += 'Invalid smith level';
-            continue;
-          }
-
           if (Math.random() * 100 > levelData.produce.successRate) {
             result += 'Failed to create anything';
           } else {
@@ -2201,19 +2243,8 @@ async function handleRollAllCommand(message) {
             await addToInventory(player.playerId, itemType, 1, baseValue);
             result += `Created ${itemType} with value ${baseValue.toFixed(2)}`;
           }
-        } else if (SKILLS[unit.type]?.levels[0]?.produce) {
-          const level = player[`${unit.type.toLowerCase()}Level`];
-          if (!level) {
-            result += 'No skill level';
-            continue;
-          }
-
-          const levelData = SKILLS[unit.type].levels[level - 1];
-          if (!levelData) {
-            result += 'Invalid skill level';
-            continue;
-          }
-
+        } 
+        else if (levelData.produce) {
           const roll = Math.random() * 100;
           let produced = 0;
 
@@ -2243,6 +2274,9 @@ async function handleRollAllCommand(message) {
         await unit.save();
         results.push(result);
         console.log(`Unit ${unit.name} result: ${result}`);
+        
+        // Add XP for the action
+        await addXP(player.playerId, unit.type, 10);
       } catch (unitError) {
         console.error(`Error processing unit ${unit.name}:`, unitError);
         results.push(`${unit.name}: Error processing action`);
@@ -2250,7 +2284,12 @@ async function handleRollAllCommand(message) {
     }
 
     console.log('Sending results to player');
-    await message.reply(`Rolled all units:\n${results.join('\n')}`);
+    const embed = new EmbedBuilder()
+      .setTitle('Roll All Results')
+      .setDescription(results.join('\n'))
+      .setFooter({ text: 'All available units have performed their actions' });
+    
+    await message.reply({ embeds: [embed] });
   } catch (error) {
     console.error('RollAll error:', error);
     message.reply('Error processing rollall command').catch(e => console.error('Failed to send error message:', e));
