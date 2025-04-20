@@ -2579,7 +2579,7 @@ bot.on('messageCreate', async message => {
     else if (command === 'attack') await handleAttackCommand(message, args);
     else if (command === 'item') await handleItemCommand(message, args);
     else if (command === 'equip') await handleEquipCommand(message, args);
-    else if (command === 'rollall') await handleRollAll(message, args);
+    else if (command === 'rollall') await handleRollAllCommand(message, args);
     else if (command === 'yesireallywanttoresetmykingdom') await handleResetCommand(message);
     else if (command === 'commands') {
       message.reply(`
