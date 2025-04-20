@@ -2366,7 +2366,7 @@ async function handleRollAllCommand(message, args) {
     
     if (!player) {
       console.log('No player found');
-      return message.reply('Use !setup first');
+      return await message.reply('Use !setup first');
     }
 
     console.log(`Found player with ${player.Units?.length} units`);
@@ -2383,7 +2383,7 @@ async function handleRollAllCommand(message, args) {
     console.log(`Available units: ${availableUnits.length}`);
     
     if (availableUnits.length === 0) {
-      return message.reply('No available units to perform actions. Units may be on cooldown, traveling, or occupied.');
+      return await message.reply('No available units to perform actions. Units may be on cooldown, traveling, or occupied.');
     }
 
     let results = [];
@@ -2475,21 +2475,11 @@ async function handleRollAllCommand(message, args) {
     await message.reply({ embeds: [embed] });
   } catch (error) {
     console.error('RollAll error:', error);
-    await message.reply('Error processing rollall command').catch(e => console.error('Failed to send error message:', e));
-  }
-}
-
-    console.log('Sending results to player');
-    const embed = new EmbedBuilder()
-      .setTitle('Roll All Results')
-      .setDescription(results.join('\n'))
-      .setFooter({ text: 'All available units have performed their actions' });
-    
-    await message.reply({ embeds: [embed] });
-  } catch (error) {
-    console.error('RollAll error:', error);
-    await message.reply('Error processing rollall command')
-      .catch(e => console.error('Failed to send error message:', e));
+    try {
+      await message.reply('Error processing rollall command');
+    } catch (e) {
+      console.error('Failed to send error message:', e);
+    }
   }
 }
 
