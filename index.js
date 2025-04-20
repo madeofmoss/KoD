@@ -1127,19 +1127,19 @@ async function handleHotPotatoCommand(message) {
 
         if (roll <= 90) { // 90% chance
             await player.increment('gold', { by: 1 });
-            result = "You got 1 gold!";
+            result = "You got :coin: gold!";
         } 
         else if (roll <= 96) { // 6% chance (90-96)
             await player.increment('gold', { by: 2 });
-            result = "You got 2 gold!";
+            result = "You got :coin: :coin: gold!";
         } 
         else if (roll <= 98) { // 2% chance (96-98)
             await player.increment('gold', { by: 5 });
-            result = "You got 5 gold! Jackpot!";
+            result = "You got :coin: :coin: :coin: :coin: :coin: gold! Jackpot!";
         } 
         else if (roll <= 99) { // 1% chance (98-99)
-            await player.increment('gold', { by: 10 });
-            result = "You got 10 gold! MEGA JACKPOT!";
+            await player.increment('gold', { by: 15 });
+            result = "You got :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: :coin: gold! JACKPOT!";
         } 
         else { // 1% chance (99-100)
             await player.update({ population: Math.max(1, player.population - 1) });
