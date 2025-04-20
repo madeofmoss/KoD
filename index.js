@@ -826,6 +826,13 @@ async function processMovement() {
   }
 }
 
+function getUnitMaxCombat(unit, player) {
+  const skillLevel = player[`${unit.type.toLowerCase()}Level`] || 1;
+  const skillData = SKILLS[unit.type];
+  if (!skillData || !skillData.levels[skillLevel - 1]) return 0;
+  return skillData.levels[skillLevel - 1].c;
+}
+
 async function handleCombat(unit, enemyCR, enemyType) {
   const player = await Player.findByPk(unit.PlayerId);
   
@@ -841,26 +848,34 @@ async function handleCombat(unit, enemyCR, enemyType) {
     combatBonus += 1;
   }
   
-  const unitCR = unit.combat + (unit.equippedWeapon || 0) + combatBonus;
+  // Get max combat and calculate effective CR
+  const maxCombat = getUnitMaxCombat(unit, player);
+  const unitCR = Math.min(unit.combat, maxCombat) + (unit.equippedWeapon || 0) + combatBonus;
   
-  // Calculate combat result
-  const playerRoll = Math.random() * unitCR;
-  const enemyRoll = Math.random() * enemyCR;
+  // Calculate win probability (unitCR / (unitCR + enemyCR))
+  const winProbability = unitCR / (unitCR + enemyCR);
+  const roll = Math.random();
   
-  if (playerRoll > enemyRoll) {
-    // Victory
-    unit.combat -= enemyCR * 0.2; // Take some damage
-    if (unit.combat <= 0) {
-      await unit.destroy();
-      return { victory: false };
-    } else {
-      await unit.save();
-      return { victory: true };
-    }
+  if (roll <= winProbability) {
+    // Victory - take damage proportional to enemy strength
+    const damage = enemyCR * 0.2 * (1 + Math.random() * 0.5); // 20-30% of enemy CR
+    
+    unit.combat = Math.max(1, unit.combat - damage);
+    unit.combat = Math.min(unit.combat, maxCombat); // Enforce max combat
+    
+    await unit.save();
+    return { 
+      victory: true,
+      damageDealt: damage.toFixed(2),
+      winChance: (winProbability * 100).toFixed(1) + '%'
+    };
   } else {
     // Defeat
     await unit.destroy();
-    return { victory: false };
+    return { 
+      victory: false,
+      winChance: (winProbability * 100).toFixed(1) + '%'
+    };
   }
 }
 
@@ -1902,10 +1917,11 @@ async function handleItemCommand(message, args) {
         return message.reply("You don't have any medicine to use");
       }
 
-      // Show unit list
-      let unitList = player.Units.map((unit, index) => 
-        `${index + 1}. ${unit.name} (${unit.type}) - Combat: ${unit.combat.toFixed(2)}`
-      ).join('\n');
+      // Show unit list with current/max combat
+      let unitList = player.Units.map((unit, index) => {
+        const maxCombat = SKILLS[unit.type]?.levels[player[`${unit.type.toLowerCase()}Level`] - 1]?.c || 0;
+        return `${index + 1}. ${unit.name} (${unit.type}) - Combat: ${unit.combat.toFixed(2)}/${maxCombat}`;
+      }).join('\n');
 
       const prompt = await message.reply(
         `Which unit would you like to heal?\n${unitList}\n\nReply with the unit number or "cancel"`
@@ -1928,18 +1944,38 @@ async function handleItemCommand(message, args) {
       }
 
       const unit = player.Units[choice];
-      unit.combat += 1;
+      const maxCombat = SKILLS[unit.type]?.levels[player[`${unit.type.toLowerCase()}Level`] - 1]?.c || 0;
+      
+      if (unit.combat >= maxCombat) {
+        return message.reply(`This unit is already at maximum combat (${maxCombat}) for their skill level.`);
+      }
+
+      const newCombat = Math.min(maxCombat, unit.combat + 1);
+      const healedAmount = newCombat - unit.combat;
+      
+      if (healedAmount <= 0) {
+        return message.reply('This unit cannot be healed further.');
+      }
+
+      unit.combat = newCombat;
       await unit.save();
       await removeFromInventory(player.playerId, 'medicine', 1);
       
-      return message.reply(`Healed ${unit.name} (+1 combat)! Their combat is now ${unit.combat.toFixed(2)}`);
+      return message.reply(`Healed ${unit.name} (+${healedAmount.toFixed(2)} combat)! Their combat is now ${unit.combat.toFixed(2)}/${maxCombat}`);
     }
 
-    // [Rest of item handling remains the same...]
+    // [Rest of item handling...]
   } catch (error) {
     console.error('Item error:', error);
     message.reply('Error using item');
   }
+}
+
+function getUnitMaxCombat(unit, player) {
+  const skillLevel = player[`${unit.type.toLowerCase()}Level`] || 1;
+  const skillData = SKILLS[unit.type];
+  if (!skillData || !skillData.levels[skillLevel - 1]) return 0;
+  return skillData.levels[skillLevel - 1].c;
 }
 
 async function handleEquipCommand(message, args) {
