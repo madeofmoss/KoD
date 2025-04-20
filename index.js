@@ -2540,6 +2540,7 @@ bot.on('messageCreate', async message => {
     else if (command === 'attack') await handleAttackCommand(message, args);
     else if (command === 'item') await handleItemCommand(message, args);
     else if (command === 'equip') await handleEquipCommand(message, args);
+    else if (command === 'rollall') await handleRollAll(message, args);
     else if (command === 'yesireallywanttoresetmykingdom') await handleResetCommand(message);
     else if (command === 'commands') {
       message.reply(`
@@ -2549,6 +2550,7 @@ Available commands:
 !units - List all your units with details
 !inventory - View your detailed inventory
 !levels - View your skill levels and XP
+!rollall - All your available units produce items
 !train <type> - Train a new unit (costs 3 food)
 !farm - Have a farmer produce food
 !hunt - Have a hunter produce food
