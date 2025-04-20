@@ -2356,7 +2356,7 @@ async function confirmAction(message, question) {
   }
 }
 
-async function handleRollAllCommand(message) {
+async function handleRollAllCommand(message, args) {
   try {
     console.log('Command received from', message.author.id);
     
@@ -2391,6 +2391,7 @@ async function handleRollAllCommand(message) {
       try {
         console.log(`Processing unit ${unit.name} (${unit.type})`);
         let result = `${unit.name} (${unit.type}): `;
+        let produced = 0;
         
         // Get the player's skill level for this unit type
         const skillLevel = player[`${unit.type.toLowerCase()}Level`] || 1;
@@ -2419,11 +2420,12 @@ async function handleRollAllCommand(message) {
             const baseValue = getRandomFloat(levelData.produce.minValue, levelData.produce.maxValue);
             await addToInventory(player.playerId, itemType, 1, baseValue);
             result += `Created ${itemType} with value ${baseValue.toFixed(2)}`;
+            produced = 1;
           }
         } 
         else if (levelData.produce) {
           const roll = Math.random() * 100;
-          let produced = 0;
+          produced = 0;
 
           for (const [amount, chance] of levelData.produce.chances) {
             if (roll <= chance) {
@@ -2453,10 +2455,28 @@ async function handleRollAllCommand(message) {
         console.log(`Unit ${unit.name} result: ${result}`);
         
         // Add XP for the action
-    if (produced > 0) {
-  await addXP(player.playerId, unit.type, 12); // Success XP
-} else {
-  await addXP(player.playerId, unit.type, 16); // Failure XP (more for trying)
+        if (produced > 0) {
+          await addXP(player.playerId, unit.type, 12); // Success XP
+        } else {
+          await addXP(player.playerId, unit.type, 16); // Failure XP (more for trying)
+        }
+      } catch (unitError) {
+        console.error(`Error processing unit ${unit.name}:`, unitError);
+        results.push(`${unit.name}: Error processing action`);
+      }
+    }
+
+    console.log('Sending results to player');
+    const embed = new EmbedBuilder()
+      .setTitle('Roll All Results')
+      .setDescription(results.join('\n'))
+      .setFooter({ text: 'All available units have performed their actions' });
+    
+    await message.reply({ embeds: [embed] });
+  } catch (error) {
+    console.error('RollAll error:', error);
+    message.reply('Error processing rollall command').catch(e => console.error('Failed to send error message:', e));
+  }
 }
 
     console.log('Sending results to player');
