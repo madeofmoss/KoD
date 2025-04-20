@@ -175,29 +175,29 @@ const SKILLS = {
   Merchant: {
     emoji: '💰',
     levels: [
-      { c: 1, m: 5, produce: { item: 'gold', chances: [[3,20],[6,60],[10,20]] } },
-      { c: 1, m: 7, produce: { item: 'gold', chances: [[4,20],[8,60],[12,20]] } },
-      { c: 1, m: 8, produce: { item: 'gold', chances: [[5,20],[10,60],[14,20]] } },
-      { c: 1, m: 9, produce: { item: 'gold', chances: [[6,20],[12,60],[16,20]] } },
-      { c: 1, m: 10, produce: { item: 'gold', chances: [[7,20],[14,60],[18,20]] } },
-      { c: 1, m: 11, produce: { item: 'gold', chances: [[8,20],[16,60],[20,20]] } }
+      { c: 1, m: 5, produce: { item: 'gold', chances: [[1,20],[5,60],[10,20]] } },
+      { c: 1, m: 7, produce: { item: 'gold', chances: [[2,20],[7,60],[13,20]] } },
+      { c: 1, m: 8, produce: { item: 'gold', chances: [[3,20],[11,60],[16,20]] } },
+      { c: 1, m: 9, produce: { item: 'gold', chances: [[4,20],[14,60],[19,20]] } },
+      { c: 1, m: 10, produce: { item: 'gold', chances: [[5,20],[17,60],[21,20]] } },
+      { c: 1, m: 11, produce: { item: 'gold', chances: [[7,20],[20,60],[25,20]] } }
     ]
   },
   Hunter: {
     emoji: '🐺',
     levels: [
-      { c: 1, m: 7, produce: { item: 'food', chances: [[0,35],[1,60],[2,5]] } },
-      { c: 1, m: 7, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
+      { c: 2, m: 7, produce: { item: 'food', chances: [[0,40],[1,55],[2,5]] } },
+      { c: 2, m: 7, produce: { item: 'food', chances: [[0,35],[1,60],[2,5]] } },
       { c: 3, m: 8, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
-      { c: 4, m: 9, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
-      { c: 4, m: 9, produce: { item: 'food', chances: [[0,25],[1,65],[2,10]] } },
-      { c: 4, m: 10, produce: { item: 'food', chances: [[0,20],[1,70],[2,15]] } }
+      { c: 3, m: 9, produce: { item: 'food', chances: [[0,25],[1,65],[2,10]] } },
+      { c: 4, m: 9, produce: { item: 'food', chances: [[0,20],[1,65],[2,15]] } },
+      { c: 5, m: 10, produce: { item: 'food', chances: [[0,15],[1,70],[2,15]] } }
     ]
   },
   Inventor: {
     emoji: '🔬',
     levels: [
-      { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,40],[1,60]] } },
+      { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,35],[1,65]] } },
       { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,30],[1,70]] } },
       { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,20],[1,70],[2,10]] } },
       { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,10],[1,70],[2,20]] } },
@@ -219,12 +219,12 @@ const SKILLS = {
   Medic: {
     emoji: '💊',
     levels: [
-      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,20],[1,70],[2,10]] } },
-      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,20],[1,65],[2,15]] } },
-      { c: 1, m: 6, produce: { item: 'medicine', chances: [[0,15],[1,70],[2,15]] } },
-      { c: 1, m: 7, produce: { item: 'medicine', chances: [[0,10],[1,75],[2,15]] } },
-      { c: 1, m: 8, produce: { item: 'medicine', chances: [[0,5],[1,80],[2,15]] } },
-      { c: 1, m: 8, produce: { item: 'medicine', chances: [[1,80],[2,20]] } }
+      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,40],[1,55],[2,5]] } },
+      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,30],[1,60],[2,10]] } },
+      { c: 1, m: 6, produce: { item: 'medicine', chances: [[0,25],[1,65],[2,10]] } },
+      { c: 1, m: 7, produce: { item: 'medicine', chances: [[0,20],[1,65],[2,15]] } },
+      { c: 1, m: 8, produce: { item: 'medicine', chances: [[0,15],[1,70],[2,15]] } },
+      { c: 1, m: 8, produce: { item: 'medicine', chances: [[1,85],[2,15]] } }
     ]
   },
   Smith: {
@@ -252,12 +252,12 @@ const SKILLS = {
   Rogue: {
     emoji: '🎭',
     levels: [
-      { c: 1, m: 5, visibilityThreshold: 1 },
-      { c: 1, m: 6, visibilityThreshold: 2 },
-      { c: 2, m: 7, visibilityThreshold: 2 },
-      { c: 2, m: 8, visibilityThreshold: 2 },
-      { c: 3, m: 9, visibilityThreshold: 3 },
-      { c: 3, m: 10, visibilityThreshold: 3 }
+      { c: 1, m: 5, stealth: 1, bankTheftChance: 0.1 },
+      { c: 1, m: 6, stealth: 2, bankTheftChance: 0.15 },
+      { c: 2, m: 7, stealth: 3, bankTheftChance: 0.2 },
+      { c: 2, m: 8, stealth: 4, bankTheftChance: 0.25 },
+      { c: 3, m: 9, stealth: 5, bankTheftChance: 0.3 },
+      { c: 3, m: 10, stealth: 6, bankTheftChance: 0.35 }
     ]
   },
   Miner: {
@@ -277,14 +277,13 @@ const SKILLS = {
 const MARKET_PRICES = {
   food: { buy: 10, sell: 3 },
   tea: { buy: 10, sell: 3 },
-  ore: { buy: 10, sell: 3 },
-  gem: { buy: 30, sell: 10 },
-  medkit: { buy: 10, sell: 3 },
+  ore: { buy: 10, sell: 5 },
+  gem: { buy: 30, sell: 15 },
   trinket: { buy: 12, sell: 4 },
   weapon: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) },
   beer_barrel: { buy: 15, sell: 5 },
-  art: { buy: 20, sell: 6 },
-  medicine: { buy: 25, sell: 8 }
+  art: { buy: 25, sell: 5 },
+  medicine: { buy: 25, sell: 5 }
 };
 
 const MONTHS = [
@@ -294,19 +293,15 @@ const MONTHS = [
   'start of autumn 🍂', 'mid autumn 🍂', 'late autumn 🍂'
 ];
 
+
 const EVENTS = [
-  { 
-    name: 'Sky Terror', 
-    description: 'A Quetzacoatl has been seen in the southeast',
-    effect: async (players) => {
-      // No direct effect, just flavor
-    }
-  },
+  // ======================
+  // NEGATIVE EVENTS (9 total)
+  // ======================
   { 
     name: 'Crustacean Fury 🦀', 
     description: 'Gigantic crabs ravage the coastlines',
     effect: async (players) => {
-      // Damage coastal units
       for (const player of players) {
         const coastalUnits = await Unit.findAll({ 
           where: { 
@@ -325,85 +320,26 @@ const EVENTS = [
           }
         }
       }
-    }
-  },
-  { 
-    name: 'Moving Shadows 👥', 
-    description: 'Stories of shadows lurking and whispering',
-    effect: async (players) => {
-      // Reduce mood for all players
-      for (const player of players) {
-        await player.update({ 
-          mood: Math.max(1, player.mood - 2) 
-        });
-      }
-    }
-  },
-  { 
-    name: 'Darvu Raiders', 
-    description: 'Bandits make themselves feel at home in Discordia',
-    effect: async (players) => {
-      // Steal gold from random players
-      for (let i = 0; i < Math.ceil(players.length / 3); i++) {
-        const victim = players[Math.floor(Math.random() * players.length)];
-        const stolen = Math.min(20, Math.floor(victim.gold * 0.1));
-        await victim.update({ gold: victim.gold - stolen });
-      }
-    }
-  },
-  { 
-    name: 'Pilgrims', 
-    description: 'Citizens make a pilgrimage to Discordia',
-    effect: async (players) => {
-      // Increase mood for all players
-      for (const player of players) {
-        await player.update({ 
-          mood: Math.min(5, player.mood + 1) 
-        });
-      }
-    }
-  },
-  { 
-    name: 'Void Gate 🌌', 
-    description: 'Word has spread of a Gate to the Void in the Southeast',
-    effect: async (players) => {
-      // No direct effect, just flavor
-    }
+    },
+    moodEffect: -1
   },
   { 
     name: 'Rat Infestation 🐀', 
     description: 'Giant rats have infested the grain stores',
     effect: async (players) => {
-      // Reduce food for all players
       for (const player of players) {
+        const foodLost = Math.max(1, Math.floor(player.food * 0.3));
         await player.update({ 
-          food: Math.max(0, player.food * .7) 
+          food: Math.max(0, player.food - foodLost) 
         });
       }
-    }
+    },
+    moodEffect: -1
   },
   { 
     name: 'Earthquake 🌍', 
     description: 'A massive earthquake shakes the land',
     effect: async (players) => {
-      // Destroy random units
-      for (const player of players) {
-        const units = await Unit.findAll({ 
-          where: { PlayerId: player.playerId }
-        });
-        
-        if (units.length > 0) {
-          const unitToDestroy = units[Math.floor(Math.random() * units.length)];
-          await unitToDestroy.destroy();
-        }
-      }
-    }
-  },
-  { 
-    name: 'Tornado 🌪', 
-    description: 'A deadly tornado tears through the countryside',
-    effect: async (players) => {
-      // Destroy random units (higher chance than earthquake)
       for (const player of players) {
         const units = await Unit.findAll({ 
           where: { PlayerId: player.playerId }
@@ -414,75 +350,232 @@ const EVENTS = [
           await unitToDestroy.destroy();
         }
       }
-    }
+    },
+    moodEffect: -2
   },
+  // 🌟 NEW NEGATIVE EVENTS 🌟
   { 
-    name: 'Wildfire 🔥', 
-    description: 'A raging wildfire consumes the forests',
+    name: 'Bandit Raid 🏴‍☠️', 
+    description: 'Marauders steal from your treasury',
     effect: async (players) => {
-      // Damage forest units and reduce food production
       for (const player of players) {
-        const forestUnits = await Unit.findAll({ 
-          where: { 
-            PlayerId: player.playerId,
-            position: 'forest'
-          }
+        const goldLost = Math.max(10, Math.floor(player.gold * 0.15));
+        await player.update({ 
+          gold: Math.max(0, player.gold - goldLost) 
         });
-        
-        if (forestUnits.length > 0) {
-          const unitToDamage = forestUnits[Math.floor(Math.random() * forestUnits.length)];
-          unitToDamage.combat -= 1;
-          if (unitToDamage.combat <= 0) {
-            await unitToDamage.destroy();
-          } else {
-            await unitToDamage.save();
-          }
-        }
       }
-    }
+    },
+    moodEffect: -1
   },
   { 
-    name: 'Pirate Raid 🏴‍☠️', 
-    description: 'Pirates attack coastal settlements',
+    name: 'Plague Outbreak 🦠', 
+    description: 'A mysterious illness spreads through your population',
     effect: async (players) => {
-      // Steal gold and damage coastal units
-      for (const player of players) {
-        const coastalUnits = await Unit.findAll({ 
-          where: { 
-            PlayerId: player.playerId,
-            position: 'coast'
-          }
-        });
-        
-        if (coastalUnits.length > 0) {
-          // Steal gold
-          const stolen = Math.min(30, Math.floor(player.gold * 0.15));
-          await player.update({ gold: player.gold - stolen });
-          
-          // Damage unit
-          const unitToDamage = coastalUnits[Math.floor(Math.random() * coastalUnits.length)];
-          unitToDamage.combat -= 2;
-          if (unitToDamage.combat <= 0) {
-            await unitToDamage.destroy();
-          } else {
-            await unitToDamage.save();
-          }
-        }
-      }
-    }
-  },
-  { 
-    name: 'Plague 💀', 
-    description: 'A deadly plague spreads through the population',
-    effect: async (players) => {
-      // Reduce population and mood
       for (const player of players) {
         await player.update({ 
           population: Math.max(1, player.population - 1),
-          mood: Math.max(1, player.mood - 1)
+          food: Math.max(0, player.food - 2) // Sick people consume more
         });
       }
-    }
+    },
+    moodEffect: -2
+  },
+  { 
+    name: 'Drought ☀️', 
+    description: 'A prolonged dry spell affects your farms',
+    effect: async (players) => {
+      for (const player of players) {
+        const farmers = await Unit.count({
+          where: {
+            PlayerId: player.playerId,
+            type: 'Farmer'
+          }
+        });
+        // More farmers = better chance to mitigate
+        if (farmers < 2 || Math.random() > farmers * 0.3) {
+          await player.update({ 
+            food: Math.max(0, player.food - 3) 
+          });
+        }
+      }
+    },
+    moodEffect: -1
+  },
+
+  // ======================
+  // POSITIVE EVENTS (9 total)
+  // ======================
+  { 
+    name: 'Bountiful Harvest 🌾', 
+    description: 'Excellent growing conditions have led to a bumper crop',
+    effect: async (players) => {
+      for (const player of players) {
+        const bonusFood = player.population * (1 + Math.floor(Math.random() * 3));
+        await player.update({ food: player.food + bonusFood });
+      }
+    },
+    moodEffect: +1
+  },
+  { 
+    name: 'Trade Boom 💰', 
+    description: 'Merchants report excellent trading conditions',
+    effect: async (players) => {
+      for (const player of players) {
+        const bonusGold = 10 + Math.floor(Math.random() * 20);
+        await player.update({ gold: player.gold + bonusGold });
+      }
+    },
+    moodEffect: +1
+  },
+  { 
+    name: 'Ancient Discovery 🏺', 
+    description: 'Your people have uncovered ancient artifacts',
+    effect: async (players) => {
+      for (const player of players) {
+        await addToInventory(player.playerId, 'trinket', 1 + Math.floor(Math.random() * 2));
+      }
+    },
+    moodEffect: +1
+  },
+  // 🌟 NEW POSITIVE EVENTS 🌟
+  { 
+    name: 'Friendly Dragons 🐉', 
+    description: 'Dragons share their hoard with your kingdom',
+    effect: async (players) => {
+      for (const player of players) {
+        if (player.race === 'Draconian') {
+          // Double bonus for Draconians
+          await player.update({ gold: player.gold + 50 });
+        } else {
+          await player.update({ gold: player.gold + 25 });
+        }
+      }
+    },
+    moodEffect: +2
+  },
+  { 
+    name: 'Healing Spring 🛁', 
+    description: 'A magical spring restores your units',
+    effect: async (players) => {
+      for (const player of players) {
+        const units = await Unit.findAll({ 
+          where: { PlayerId: player.playerId }
+        });
+        for (const unit of units) {
+          const maxCombat = getUnitMaxCombat(unit, player);
+          unit.combat = maxCombat;
+          await unit.save();
+        }
+      }
+    },
+    moodEffect: +1
+  },
+  { 
+    name: 'Skillful Year 📚', 
+    description: 'Your people have made great advancements',
+    effect: async (players) => {
+      for (const player of players) {
+        const skills = Object.keys(SKILLS);
+        const randomSkill = skills[Math.floor(Math.random() * skills.length)];
+        await addXP(player.playerId, randomSkill, 50);
+      }
+    },
+    moodEffect: +1
+  },
+
+  // ======================
+  // NEUTRAL/MIXED EVENTS (9 total)
+  // ======================
+  { 
+    name: 'Mysterious Stranger 🎭', 
+    description: 'A strange traveler visits your kingdom',
+    effect: async (players) => {
+      for (const player of players) {
+        if (Math.random() > 0.5) {
+          await player.update({ gold: player.gold + 15 });
+        } else {
+          await player.update({ gold: Math.max(0, player.gold - 10) });
+        }
+      }
+    },
+    moodEffect: 0
+  },
+  { 
+    name: 'Wild Migration 🦌', 
+    description: 'Large herds of animals pass through your lands',
+    effect: async (players) => {
+      for (const player of players) {
+        const hunters = await Unit.count({
+          where: {
+            PlayerId: player.playerId,
+            type: 'Hunter'
+          }
+        });
+        if (hunters > 0) {
+          await player.update({ food: player.food + hunters * 2 });
+        }
+      }
+    },
+    moodEffect: 0
+  },
+  // 🌟 NEW NEUTRAL EVENTS 🌟
+  { 
+    name: 'Market Fluctuations 📈', 
+    description: 'Unusual market conditions affect prices',
+    effect: async (players) => {
+      // Temporarily modifies market prices
+      for (const player of players) {
+        if (Math.random() > 0.5) {
+          player.marketBonus = 0.8; // 20% cheaper
+        } else {
+          player.marketBonus = 1.2; // 20% more expensive
+        }
+        await player.save();
+      }
+    },
+    moodEffect: 0,
+    duration: 24 // Hours until effect expires
+  },
+  { 
+    name: 'Wandering Bard 🎶', 
+    description: 'A traveling musician visits your kingdom',
+    effect: async (players) => {
+      for (const player of players) {
+        if (player.mood < 3) {
+          await player.update({ mood: player.mood + 1 });
+        } else {
+          // Already happy kingdoms get gold instead
+          await player.update({ gold: player.gold + 5 });
+        }
+      }
+    },
+    moodEffect: 0
+  },
+  { 
+    name: 'Strange Fog 🌫️', 
+    description: 'An eerie fog blankets the land',
+    effect: async (players) => {
+      // Affects visibility and movement
+      for (const player of players) {
+        const rogues = await Unit.count({
+          where: {
+            PlayerId: player.playerId,
+            type: 'Rogue'
+          }
+        });
+        if (rogues < 1) {
+          // Non-rogue kingdoms get movement penalty
+          const units = await Unit.findAll({ 
+            where: { PlayerId: player.playerId }
+          });
+          for (const unit of units) {
+            unit.movement = Math.max(1, unit.movement - 1);
+            await unit.save();
+          }
+        }
+      }
+    },
+    moodEffect: 0
   }
 ];
 
@@ -640,11 +733,15 @@ function getCurrentDate() {
 }
 
 function getDailyEvent() {
-  const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  const roll = Math.random();
+  let pool;
+  
+  if (roll < 0.4) pool = EVENTS.filter(e => e.moodEffect < 0); // 40% negative
+  else if (roll < 0.8) pool = EVENTS.filter(e => e.moodEffect > 0); // 40% positive
+  else pool = EVENTS.filter(e => e.moodEffect === 0); // 20% neutral
+
   return {
-    name: event.name,
-    description: event.description,
-    effect: event.effect,
+    ...pool[Math.floor(Math.random() * pool.length)],
     isPublic: Math.random() > 0.3
   };
 }
@@ -2356,12 +2453,11 @@ async function handleRollAllCommand(message) {
         console.log(`Unit ${unit.name} result: ${result}`);
         
         // Add XP for the action
-        await addXP(player.playerId, unit.type, 10);
-      } catch (unitError) {
-        console.error(`Error processing unit ${unit.name}:`, unitError);
-        results.push(`${unit.name}: Error processing action`);
-      }
-    }
+    if (produced > 0) {
+  await addXP(player.playerId, unit.type, 12); // Success XP
+} else {
+  await addXP(player.playerId, unit.type, 16); // Failure XP (more for trying)
+}
 
     console.log('Sending results to player');
     const embed = new EmbedBuilder()
@@ -2592,6 +2688,92 @@ async function handleAttackCommand(message, args) {
   }
 }
 
+async function handleRogueCommand(message, args) {
+  const subCommand = args[0]?.toLowerCase();
+  const player = await Player.findByPk(message.author.id, {
+    include: [Unit]
+  });
+
+  if (!subCommand || !['infiltrate', 'heist'].includes(subCommand)) {
+    return message.reply('Usage: `!rogue infiltrate <rogueName> <playerId>` OR `!rogue heist <rogueName>`');
+  }
+
+  const rogueName = args.slice(1, -1).join(' ');
+  const rogue = player.Units.find(u => 
+    u.type === 'Rogue' && 
+    u.name.toLowerCase() === rogueName.toLowerCase()
+  );
+
+  if (!rogue) return message.reply('Rogue not found');
+  if (rogue.isTraveling) return message.reply('Rogue is currently moving');
+
+  const rogueLevel = SKILLS.Rogue.levels[player.rogueLevel - 1];
+
+  if (subCommand === 'infiltrate') {
+    const targetId = args[args.length - 1];
+    const target = await Player.findByPk(targetId);
+    if (!target) return message.reply('Target kingdom not found');
+
+    // Infiltration logic
+    const detectionChance = 0.3 - (rogueLevel.stealth * 0.1);
+    
+    if (Math.random() > detectionChance) {
+      const stolenGold = Math.min(15, Math.floor(target.gold * 0.1));
+      await target.update({ gold: target.gold - stolenGold });
+      await player.update({ gold: player.gold + stolenGold });
+      
+      const targetUser = await bot.users.fetch(targetId);
+      targetUser.send(`💸 A rogue stole ${stolenGold}g from your kingdom!`);
+      
+      message.reply(`Your rogue stole ${stolenGold}g successfully!`);
+      await addXP(player.playerId, 'Rogue', 15);
+    } else {
+      message.reply('Your rogue was caught and killed!');
+      await rogue.destroy();
+      const targetUser = await bot.users.fetch(targetId);
+      targetUser.send(`🕵️ A rogue from ${player.username}'s kingdom was caught!`);
+    }
+  } 
+  else if (subCommand === 'heist') {
+    // Bank heist logic
+    const successChance = rogueLevel.bankTheftChance - 0.05;
+    const totalBank = await Player.sum('bankGold');
+    const heistAmount = Math.min(50, Math.floor(totalBank * 0.02));
+
+    if (Math.random() < successChance) {
+      const victims = await Player.findAll({ 
+        where: { bankGold: { [Op.gt]: 0 } },
+        order: sequelize.random(),
+        limit: 3
+      });
+      
+      let stolenTotal = 0;
+      for (const victim of victims) {
+        const stolen = Math.min(heistAmount, Math.floor(victim.bankGold * 0.3));
+        await victim.update({ bankGold: victim.bankGold - stolen });
+        stolenTotal += stolen;
+        const victimUser = await bot.users.fetch(victim.playerId);
+        victimUser.send(`🏦 The kingdom bank was robbed! Lost ${stolen}g from your taxes.`);
+      }
+      
+      await player.update({ gold: player.gold + stolenTotal });
+      message.reply(`💰 Bank heist successful! Stole ${stolenTotal}g.`);
+      await addXP(player.playerId, 'Rogue', 25);
+    } else {
+      message.reply('🚨 Bank heist failed! Rogue executed and 30g fine imposed.');
+      await rogue.destroy();
+      await player.update({ gold: Math.max(0, player.gold - 30) });
+      
+      const announcementChannel = bot.channels.cache.get(process.env.ANNOUNCEMENT_CHANNEL);
+      if (announcementChannel) {
+        announcementChannel.send(
+          `⚖️ ${player.username}'s rogue was executed for bank robbery! 30g fine imposed.`
+        );
+      }
+    }
+  }
+}
+
 // =================
 // Reset Command
 // =================
@@ -2657,6 +2839,7 @@ bot.on('messageCreate', async message => {
     else if (command === 'wander') await handleWanderCommand(message, args);
     else if (command === 'sail') await handleSailCommand(message, args);
     else if (command === 'attack') await handleAttackCommand(message, args);
+    else if (command === 'rogue') await handleRogueCommand(message, args);
     else if (command === 'item') await handleItemCommand(message, args);
     else if (command === 'equip') await handleEquipCommand(message, args);
     else if (command === 'rollall') await handleRollAllCommand(message, args);
