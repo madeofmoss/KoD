@@ -317,7 +317,7 @@ const EVENTS = [
         
         if (coastalUnits.length > 0) {
           const unitToDamage = coastalUnits[Math.floor(Math.random() * coastalUnits.length)];
-          unitToDamage.combat -= 1;
+          unitToDamage.combat -= 2;
           if (unitToDamage.combat <= 0) {
             await unitToDamage.destroy();
           } else {
@@ -334,7 +334,7 @@ const EVENTS = [
       // Reduce mood for all players
       for (const player of players) {
         await player.update({ 
-          mood: Math.max(1, player.mood - 1) 
+          mood: Math.max(1, player.mood - 2) 
         });
       }
     }
@@ -377,7 +377,7 @@ const EVENTS = [
       // Reduce food for all players
       for (const player of players) {
         await player.update({ 
-          food: Math.max(0, player.food - 1) 
+          food: Math.max(0, player.food * .7) 
         });
       }
     }
@@ -542,7 +542,7 @@ const Player = sequelize.define('Player', {
   trinketActive: { type: DataTypes.BOOLEAN, defaultValue: false },
   beerActive: { type: DataTypes.BOOLEAN, defaultValue: false },
   medicineActive: { type: DataTypes.BOOLEAN, defaultValue: false },
-  bankGold: { type: DataTypes.INTEGER, defaultValue: 0 } 
+  bankGold: { type: DataTypes.INTEGER, defaultValue: 0 } // New field for bank gold
 }, { timestamps: false });
 
 const Unit = sequelize.define('Unit', {
@@ -580,8 +580,6 @@ const Structure = sequelize.define('Structure', {
   goldSpent: DataTypes.INTEGER
 }, { timestamps: false });
 
-  bankGold: { type: DataTypes.INTEGER, defaultValue: 0 } // New field for bank gold
-}, { timestamps: false });
 
 // Set up relationships
 Player.hasMany(Unit, { foreignKey: 'PlayerId' });
