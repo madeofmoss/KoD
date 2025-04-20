@@ -2488,7 +2488,8 @@ async function handleRollAllCommand(message, args) {
     await message.reply({ embeds: [embed] });
   } catch (error) {
     console.error('RollAll error:', error);
-    message.reply('Error processing rollall command').catch(e => console.error('Failed to send error message:', e));
+    await message.reply('Error processing rollall command')
+      .catch(e => console.error('Failed to send error message:', e));
   }
 }
 
