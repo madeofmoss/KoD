@@ -541,7 +541,8 @@ const Player = sequelize.define('Player', {
   // For consumable effects
   trinketActive: { type: DataTypes.BOOLEAN, defaultValue: false },
   beerActive: { type: DataTypes.BOOLEAN, defaultValue: false },
-  medicineActive: { type: DataTypes.BOOLEAN, defaultValue: false }
+  medicineActive: { type: DataTypes.BOOLEAN, defaultValue: false },
+  bankGold: { type: DataTypes.INTEGER, defaultValue: 0 } 
 }, { timestamps: false });
 
 const Unit = sequelize.define('Unit', {
