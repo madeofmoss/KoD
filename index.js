@@ -276,11 +276,12 @@ const SKILLS = {
 
 const MARKET_PRICES = {
   food: { buy: 10, sell: 3 },
-  tea: { buy: 10, sell: 3 },
-  ore: { buy: 10, sell: 5 },
+  tea: { buy: 20, sell: 6 },
+  ore: { buy: 12, sell: 4 },
   gem: { buy: 30, sell: 15 },
   trinket: { buy: 12, sell: 4 },
   weapon: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) },
+  armor: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) },
   beer_barrel: { buy: 15, sell: 5 },
   art: { buy: 25, sell: 5 },
   medicine: { buy: 25, sell: 5 }
@@ -1500,7 +1501,7 @@ async function handleFarmCommand(message) {
     }
 
     // Check for trinket bonus
-    if (player.trinketActive && Math.random() < 0.5) {
+    if (player.trinketActive && Math.random() < 0.8) {
       produced *= 2;
       await player.update({ trinketActive: false });
     }
@@ -2045,12 +2046,12 @@ async function handleSailCommand(message, args) {
 async function handleItemCommand(message, args) {
   try {
     const player = await Player.findByPk(message.author.id, {
-      include: [Unit, Inventory]
+      include: [Inventory]
     });
     if (!player) return message.reply('Use !setup first');
 
     const itemType = args[0]?.toLowerCase();
-    if (!itemType) return message.reply('Specify an item to use (medicine, etc.)');
+    if (!itemType) return message.reply('Specify an item to use (medicine, tea, art, trinket)');
 
     if (itemType === 'medicine') {
       const medicine = player.Inventories.find(i => i.itemType === 'medicine');
@@ -2105,7 +2106,67 @@ async function handleItemCommand(message, args) {
       return message.reply(`Healed ${unit.name} (+${healedAmount.toFixed(2)} combat)! Their combat is now ${unit.combat.toFixed(2)}/${maxCombat}`);
     }
 
-    // [Rest of item handling...]
+    else if (itemType === 'tea') {
+      const tea = player.Inventories.find(i => i.itemType === 'tea');
+      if (!tea || tea.quantity < 1) {
+        return message.reply("You don't have any tea to use");
+      }
+
+      await player.update({ 
+        mood: Math.min(5, player.mood + 1),
+        trinketActive: Math.random() < 0.2 // 20% chance for trinket effect
+      });
+      await removeFromInventory(player.playerId, 'tea', 1);
+      
+      return message.reply('Used tea: +1 mood' + 
+        (player.trinketActive ? ' and gained trinket effect!' : ''));
+    }
+    else if (itemType === 'art') {
+      const art = player.Inventories.find(i => i.itemType === 'art');
+      if (!art || art.quantity < 1) {
+        return message.reply("You don't have any art to use");
+      }
+
+      const roll = Math.random();
+      let moodChange = 0;
+      let result = '';
+
+      if (roll < 0.1) {
+        moodChange = -1;
+        result = 'The art was controversial! -1 mood';
+      } else if (roll < 0.3) {
+        result = 'The art was mediocre. No mood change';
+      } else if (roll < 0.8) {
+        moodChange = 1;
+        result = 'The art was inspiring! +1 mood';
+      } else {
+        moodChange = 2;
+        result = 'The art was magnificent! +2 mood';
+      }
+
+      await player.update({ 
+        mood: Math.max(1, Math.min(5, player.mood + moodChange))
+      });
+      await removeFromInventory(player.playerId, 'art', 1);
+      
+      return message.reply(result);
+    }
+    else if (itemType === 'trinket') {
+      const trinket = player.Inventories.find(i => i.itemType === 'trinket');
+      if (!trinket || trinket.quantity < 1) {
+        return message.reply("You don't have any trinkets to use");
+      }
+
+      await player.update({ 
+        trinketActive: true 
+      });
+      await removeFromInventory(player.playerId, 'trinket', 1);
+      
+      return message.reply('Used trinket: Next production has 80% chance to be doubled!');
+    }
+    else {
+      return message.reply('Invalid item type');
+    }
   } catch (error) {
     console.error('Item error:', error);
     message.reply('Error using item');
@@ -2570,7 +2631,7 @@ async function handleSellCommand(message, args) {
       
       const price = MARKET_PRICES[item].sell * quantity;
       const merchantLevel = player.merchantLevel;
-      const discount = merchantLevel * 0.05;
+      const discount = merchantLevel * 0.05 - 0.05;
       const finalPrice = Math.floor(price * (1 + discount)); // Bonus when selling
 
       await player.update({ 
@@ -2706,13 +2767,13 @@ async function handleRogueCommand(message, args) {
   });
 
   if (!subCommand || !['infiltrate', 'heist'].includes(subCommand)) {
-    return message.reply('Usage: `!rogue infiltrate <rogueName> <playerId>` OR `!rogue heist <rogueName>`');
+    return message.reply('Usage: `!rogue infiltrate <unitName> <playerId>` OR `!rogue heist <unitName>`');
   }
 
-  const rogueName = args.slice(1, -1).join(' ');
+  const unitName = args.slice(1, -1).join(' ');
   const rogue = player.Units.find(u => 
     u.type === 'Rogue' && 
-    u.name.toLowerCase() === rogueName.toLowerCase()
+    u.name.toLowerCase() === unitName.toLowerCase()
   );
 
   if (!rogue) return message.reply('Rogue not found');
