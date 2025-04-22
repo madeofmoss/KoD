@@ -302,14 +302,14 @@ const SKILLS = {
 };
 
 const MARKET_PRICES = {
-  food: { buy: 10, sell: 3 },
+  food: { buy: 20, sell: 6 },
   tea: { buy: 20, sell: 6 },
-  ore: { buy: 12, sell: 4 },
-  gem: { buy: 30, sell: 15 },
-  trinket: { buy: 12, sell: 4 },
-  weapon: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) },
-  armor: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 3) },
-  beer_barrel: { buy: 15, sell: 5 },
+  ore: { buy: 25, sell: 6 },
+  gem: { buy: 50, sell: 20 },
+  trinket: { buy: 20, sell: 6 },
+  weapon: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 2) },
+  armor: { buy: (value) => Math.floor(value * 10), sell: (value) => Math.floor(value * 2) },
+  beer_barrel: { buy: 15, sell: 6 },
   art: { buy: 25, sell: 5 },
   medicine: { buy: 25, sell: 5 }
 };
