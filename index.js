@@ -142,12 +142,18 @@ const SKILLS = {
   Farmer: {
     emoji: '🌽',
     levels: [
-      { c: 1, m: 5, produce: { item: 'food', chances: [[0,25],[1,65],[2,10]] } },
-      { c: 1, m: 5, produce: { item: 'food', chances: [[0,20],[1,70],[2,10]] } },
-      { c: 1, m: 5, produce: { item: 'food', chances: [[0,15],[1,75],[2,10]] } },
-      { c: 1, m: 7, produce: { item: 'food', chances: [[0,10],[1,80],[2,10]] } },
-      { c: 1, m: 8, produce: { item: 'food', chances: [[0,5],[1,85],[2,10]] } },
-      { c: 1, m: 9, produce: { item: 'food', chances: [[1,85],[2,15]] } }
+      { c: 1, m: 5, produce: { item: 'food', chances: [[0,60],[1,35],[2,5]] } },
+      { c: 1, m: 5, produce: { item: 'food', chances: [[0,50],[1,45],[2,5]] } },
+      { c: 1, m: 5, produce: { item: 'food', chances: [[0,40],[1,55],[2,5]] } },
+      { c: 1, m: 6, produce: { item: 'food', chances: [[0,35],[1,55],[2,10]] } },
+      { c: 1, m: 6, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
+      { c: 1, m: 6, produce: { item: 'food', chances: [[0,25],[1,65],[2,10]] } },
+      { c: 1, m: 7, produce: { item: 'food', chances: [[0,20],[1,65],[2,15]] } },
+      { c: 1, m: 7, produce: { item: 'food', chances: [[0,15],[1,70],[2,15]] } },
+      { c: 1, m: 7, produce: { item: 'food', chances: [[0,10],[1,75],[2,15]] } },
+      { c: 1, m: 8, produce: { item: 'food', chances: [[0,5],[1,75],[2,20]] } },
+      { c: 1, m: 8, produce: { item: 'food', chances: [[1,75],[2,20],[3,5]] } },
+      { c: 1, m: 8, produce: { item: 'food', chances: [[1,70],[2,20],[3,10]] } }
     ]
   },
   Warrior: {
@@ -158,40 +164,64 @@ const SKILLS = {
       { c: 4, m: 7 },
       { c: 5, m: 8 },
       { c: 6, m: 9 },
-      { c: 7, m: 9 }
+      { c: 7, m: 9 },
+      { c: 8, m: 10 },
+      { c: 9, m: 10 },
+      { c: 10, m: 11 },
+      { c: 11, m: 11 },
+      { c: 12, m: 12 },
+      { c: 14, m: 12 }
     ]
   },
   Monk: {
     emoji: '🙌',
     levels: [
       { c: 1, m: 7, produce: { item: 'beer_barrel', chances: [[0,20],[1,75],[2,5]] } },
-      { c: 1, m: 7, produce: { item: 'beer_barrel', chances: [[0,20],[1,75],[2,5]] } },
-      { c: 1, m: 8, produce: { item: 'beer_barrel', chances: [[0,20],[1,75],[2,5]] } },
-      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,15],[1,80],[2,5]] } },
-      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,15],[1,80],[2,5]] } },
-      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,15],[1,80],[2,5]] } }
+      { c: 1, m: 7, produce: { item: 'beer_barrel', chances: [[0,20],[1,70],[2,10]] } },
+      { c: 1, m: 7, produce: { item: 'beer_barrel', chances: [[0,20],[1,65],[2,15]] } },
+      { c: 1, m: 8, produce: { item: 'beer_barrel', chances: [[0,15],[1,65],[2,20]] } },
+      { c: 1, m: 8, produce: { item: 'beer_barrel', chances: [[0,15],[1,60],[2,25]] } },
+      { c: 1, m: 8, produce: { item: 'beer_barrel', chances: [[0,15],[1,55],[2,30]] } },
+      { c: 1, m: 8, produce: { item: 'beer_barrel', chances: [[0,10],[1,55],[2,35]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,10],[1,50],[2,40]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[0,10],[1,45],[2,45]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[1,45],[2,50],[3,5]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[1,40],[2,50],[3,10]] } },
+      { c: 1, m: 9, produce: { item: 'beer_barrel', chances: [[1,35],[2,50],[3,15]] } }
     ]
   },
   Merchant: {
     emoji: '💰',
     levels: [
       { c: 1, m: 5, produce: { item: 'gold', chances: [[1,20],[5,60],[10,20]] } },
-      { c: 1, m: 7, produce: { item: 'gold', chances: [[2,20],[7,60],[13,20]] } },
-      { c: 1, m: 8, produce: { item: 'gold', chances: [[3,20],[11,60],[16,20]] } },
-      { c: 1, m: 9, produce: { item: 'gold', chances: [[4,20],[14,60],[19,20]] } },
-      { c: 1, m: 10, produce: { item: 'gold', chances: [[5,20],[17,60],[21,20]] } },
-      { c: 1, m: 11, produce: { item: 'gold', chances: [[7,20],[20,60],[25,20]] } }
+      { c: 1, m: 5, produce: { item: 'gold', chances: [[2,20],[6,60],[11,20]] } },
+      { c: 1, m: 6, produce: { item: 'gold', chances: [[3,20],[7,60],[12,20]] } },
+      { c: 1, m: 6, produce: { item: 'gold', chances: [[4,20],[8,60],[13,20]] } },
+      { c: 1, m: 7, produce: { item: 'gold', chances: [[5,20],[11,60],[14,20]] } },
+      { c: 1, m: 7, produce: { item: 'gold', chances: [[6,20],[12,60],[16,20]] } },
+      { c: 1, m: 8, produce: { item: 'gold', chances: [[7,20],[14,60],[18,20]] } },
+      { c: 1, m: 9, produce: { item: 'gold', chances: [[8,20],[15,60],[19,20]] } },
+      { c: 1, m: 10, produce: { item: 'gold', chances: [[9,20],[17,60],[20,20]] } },
+      { c: 1, m: 10, produce: { item: 'gold', chances: [[10,20],[18,60],[21,20]] } },
+      { c: 1, m: 11, produce: { item: 'gold', chances: [[11,20],[20,60],[24,20]] } },
+      { c: 1, m: 11, produce: { item: 'gold', chances: [[12,20],[22,60],[25,20]] } }
     ]
   },
   Hunter: {
     emoji: '🐺',
     levels: [
-      { c: 2, m: 7, produce: { item: 'food', chances: [[0,40],[1,55],[2,5]] } },
-      { c: 2, m: 7, produce: { item: 'food', chances: [[0,35],[1,60],[2,5]] } },
-      { c: 3, m: 8, produce: { item: 'food', chances: [[0,30],[1,60],[2,10]] } },
-      { c: 3, m: 9, produce: { item: 'food', chances: [[0,25],[1,65],[2,10]] } },
-      { c: 4, m: 9, produce: { item: 'food', chances: [[0,20],[1,65],[2,15]] } },
-      { c: 5, m: 10, produce: { item: 'food', chances: [[0,15],[1,70],[2,15]] } }
+      { c: 2, m: 7, produce: { item: 'food', chances: [[0,80],[1,15],[2,5]] } },
+      { c: 2, m: 7, produce: { item: 'food', chances: [[0,75],[1,15],[2,10]] } },
+      { c: 3, m: 7, produce: { item: 'food', chances: [[0,70],[1,15],[2,15]] } },
+      { c: 3, m: 7, produce: { item: 'food', chances: [[0,65],[1,15],[2,20]] } },
+      { c: 3, m: 8, produce: { item: 'food', chances: [[0,60],[1,15],[2,25]] } },
+      { c: 4, m: 8, produce: { item: 'food', chances: [[0,55],[1,15],[2,30]] } },
+      { c: 4, m: 9, produce: { item: 'food', chances: [[0,50],[1,20],[2,30]] } },
+      { c: 5, m: 9, produce: { item: 'food', chances: [[0,45],[1,25],[2,30]] } },
+      { c: 5, m: 9, produce: { item: 'food', chances: [[0,40],[1,30],[2,30]] } },
+      { c: 6, m: 9, produce: { item: 'food', chances: [[0,30],[1,40],[2,30]] } },
+      { c: 6, m: 10, produce: { item: 'food', chances: [[0,20],[1,50],[2,30]] } },
+      { c: 7, m: 11, produce: { item: 'food', chances: [[0,10],[1,60],[2,30]] } }
     ]
   },
   Inventor: {
@@ -202,29 +232,48 @@ const SKILLS = {
       { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,20],[1,70],[2,10]] } },
       { c: 1, m: 4, produce: { item: 'trinket', chances: [[0,10],[1,70],[2,20]] } },
       { c: 1, m: 5, produce: { item: 'trinket', chances: [[1,80],[2,20]] } },
-      { c: 1, m: 6, produce: { item: 'trinket', chances: [[1,80],[2,10],[3,10]] } }
+      { c: 1, m: 6, produce: { item: 'trinket', chances: [[1,80],[2,10],[3,10]] } },
+      { c: 1, m: 6, produce: { item: 'trinket', chances: [[1,75],[2,15],[3,10]] } },
+      { c: 1, m: 7, produce: { item: 'trinket', chances: [[1,70],[2,20],[3,10]] } },
+      { c: 1, m: 7, produce: { item: 'trinket', chances: [[1,65],[2,25],[3,10]] } },
+      { c: 1, m: 8, produce: { item: 'trinket', chances: [[1,60],[2,30],[3,10]] } },
+      { c: 1, m: 8, produce: { item: 'trinket', chances: [[1,55],[2,35],[3,10]] } },
+      { c: 1, m: 9, produce: { item: 'trinket', chances: [[1,50],[2,40],[3,10]] } }
     ]
   },
   Architect: {
     emoji: '🏛',
     levels: [
-      { c: 1, m: 5 },
-      { c: 1, m: 6 },
-      { c: 1, m: 7 },
-      { c: 1, m: 8 },
-      { c: 1, m: 8, produce: { item: 'trinket', chances: [[0,40],[1,60]] } },
-      { c: 1, m: 8, produce: { item: 'trinket', chances: [[0,30],[1,60],[2,10]] } }
-    ]
+      { c: 1, m: 5, build: { cost: 50, effect: "+1 population capacity" } }, // Lv1
+      { c: 1, m: 6, build: { cost: 75, effect: "+10% production efficiency" } }, // Lv2
+      { c: 1, m: 7, build: { cost: 100, effect: "+1 mood" } }, // Lv3
+      { c: 1, m: 8, build: { cost: 125, effect: "+2 population capacity" } }, // Lv4
+      { c: 1, m: 8, build: { cost: 150, effect: "+20% production efficiency" } }, // Lv5
+      { c: 1, m: 8, build: { cost: 175, effect: "+2 mood" } }, // Lv6
+      { c: 1, m: 9, build: { cost: 200, effect: "+3 population capacity" } }, // Lv7
+      { c: 1, m: 9, build: { cost: 225, effect: "+30% production efficiency" } }, // Lv8
+      { c: 1, m: 10, build: { cost: 250, effect: "+3 mood" } }, // Lv9
+      { c: 1, m: 10, build: { cost: 275, effect: "+4 population capacity" } }, // Lv10
+      { c: 1, m: 11, build: { cost: 300, effect: "+40% production efficiency" } }, // Lv11
+      { c: 1, m: 12, build: { cost: 350, effect: "+5 mood, +5 population capacity" } } // Lv12
+    ],
+    unique: true // Flag for special handling
   },
   Medic: {
-    emoji: '💊',
-    levels: [
-      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,40],[1,55],[2,5]] } },
-      { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,30],[1,60],[2,10]] } },
-      { c: 1, m: 6, produce: { item: 'medicine', chances: [[0,25],[1,65],[2,10]] } },
-      { c: 1, m: 7, produce: { item: 'medicine', chances: [[0,20],[1,65],[2,15]] } },
-      { c: 1, m: 8, produce: { item: 'medicine', chances: [[0,15],[1,70],[2,15]] } },
-      { c: 1, m: 8, produce: { item: 'medicine', chances: [[1,85],[2,15]] } }
+  emoji: '💊',
+  levels: [
+    { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,40],[1,55],[2,5]], healPower: 1.0 } },
+    { c: 1, m: 5, produce: { item: 'medicine', chances: [[0,30],[1,60],[2,10]], healPower: 1.2 } },
+    { c: 1, m: 6, produce: { item: 'medicine', chances: [[0,25],[1,65],[2,10]], healPower: 1.4 } },
+    { c: 1, m: 7, produce: { item: 'medicine', chances: [[0,20],[1,65],[2,15]], healPower: 1.6 } },
+    { c: 1, m: 8, produce: { item: 'medicine', chances: [[0,15],[1,70],[2,15]], healPower: 1.8 } },
+    { c: 1, m: 8, produce: { item: 'medicine', chances: [[1,85],[2,15]], healPower: 2.0 } },
+      { c: 1, m: 9, produce: { item: 'medicine', chances: [[1,80],[2,15],[3,5]], healPower: 2.2 } },
+      { c: 1, m: 9, produce: { item: 'medicine', chances: [[1,75],[2,20],[3,5]], healPower: 2.4 } },
+      { c: 1, m: 10, produce: { item: 'medicine', chances: [[1,70],[2,25],[3,5]], healPower: 2.6 } },
+      { c: 1, m: 10, produce: { item: 'medicine', chances: [[1,65],[2,30],[3,5]], healPower: 2.8 } },
+      { c: 1, m: 11, produce: { item: 'medicine', chances: [[1,60],[2,35],[3,5]], healPower: 3.0 } },
+      { c: 1, m: 11, produce: { item: 'medicine', chances: [[1,50],[2,40],[3,10]], healPower: 3.5 } },
     ]
   },
   Smith: {
@@ -235,7 +284,13 @@ const SKILLS = {
       { c: 2, m: 5, produce: { item: 'weapon', minValue: 2.8, maxValue: 3.2, successRate: 80 } },
       { c: 2, m: 6, produce: { item: 'weapon', minValue: 3.8, maxValue: 4.2, successRate: 90 } },
       { c: 3, m: 7, produce: { item: 'weapon', minValue: 4.8, maxValue: 5.2, successRate: 95 } },
-      { c: 3, m: 8, produce: { item: 'weapon', minValue: 5.8, maxValue: 6.2, successRate: 100 } }
+      { c: 3, m: 8, produce: { item: 'weapon', minValue: 5.8, maxValue: 6.2, successRate: 100 } },
+      { c: 4, m: 8, produce: { item: 'weapon', minValue: 6.5, maxValue: 7.5, successRate: 100, oreCost: 1 } },
+      { c: 4, m: 9, produce: { item: 'weapon', minValue: 7.5, maxValue: 8.5, successRate: 100, oreCost: 1 } },
+      { c: 5, m: 9, produce: { item: 'weapon', minValue: 8.5, maxValue: 9.5, successRate: 100, oreCost: 1 } },
+      { c: 5, m: 10, produce: { item: 'weapon', minValue: 9.5, maxValue: 10.5, successRate: 100, oreCost: 2 } },
+      { c: 6, m: 10, produce: { item: 'weapon', minValue: 10.5, maxValue: 11.5, successRate: 100, oreCost: 2 } },
+      { c: 6, m: 11, produce: { item: 'weapon', minValue: 11.5, maxValue: 13.0, successRate: 100, oreCost: 2 } }
     ]
   },
   Entertainer: {
@@ -246,7 +301,13 @@ const SKILLS = {
       { c: 1, m: 7, produce: { item: 'art', chances: [[0,10],[1,70],[2,20]] } },
       { c: 1, m: 8, produce: { item: 'art', chances: [[0,5],[1,70],[2,25]] } },
       { c: 1, m: 9, produce: { item: 'art', chances: [[1,75],[2,25]] } },
-      { c: 1, m: 10, produce: { item: 'art', chances: [[1,70],[2,30]] } }
+      { c: 1, m: 10, produce: { item: 'art', chances: [[1,70],[2,30]] } },
+      { c: 1, m: 10, produce: { item: 'art', chances: [[1,65],[2,30],[3,5]] } },
+      { c: 1, m: 11, produce: { item: 'art', chances: [[1,60],[2,35],[3,5]] } },
+      { c: 1, m: 11, produce: { item: 'art', chances: [[1,55],[2,40],[3,5]] } },
+      { c: 1, m: 12, produce: { item: 'art', chances: [[1,50],[2,45],[3,5]] } },
+      { c: 1, m: 12, produce: { item: 'art', chances: [[1,45],[2,50],[3,5]] } },
+      { c: 1, m: 12, produce: { item: 'art', chances: [[1,40],[2,55],[3,5]] } }
     ]
   },
   Rogue: {
@@ -257,7 +318,13 @@ const SKILLS = {
       { c: 2, m: 7, stealth: 3, bankTheftChance: 0.2 },
       { c: 2, m: 8, stealth: 4, bankTheftChance: 0.25 },
       { c: 3, m: 9, stealth: 5, bankTheftChance: 0.3 },
-      { c: 3, m: 10, stealth: 6, bankTheftChance: 0.35 }
+      { c: 3, m: 10, stealth: 6, bankTheftChance: 0.35 },
+      { c: 4, m: 10, stealth: 7, bankTheftChance: 0.4 },
+      { c: 4, m: 11, stealth: 8, bankTheftChance: 0.45 },
+      { c: 5, m: 11, stealth: 9, bankTheftChance: 0.5 },
+      { c: 5, m: 12, stealth: 10, bankTheftChance: 0.55 },
+      { c: 6, m: 12, stealth: 11, bankTheftChance: 0.6 },
+      { c: 6, m: 12, stealth: 12, bankTheftChance: 0.7 }
     ]
   },
   Miner: {
@@ -266,9 +333,15 @@ const SKILLS = {
       { c: 1, m: 6, produce: { item: 'ore', chances: [[0,50],[1,45],[2,5]], special: { item: 'gem', chance: 5 } } },
       { c: 1, m: 6, produce: { item: 'ore', chances: [[0,40],[1,55],[2,5]], special: { item: 'gem', chance: 5 } } },
       { c: 1, m: 7, produce: { item: 'ore', chances: [[0,30],[1,65],[2,5]], special: { item: 'gem', chance: 5 } } },
-      { c: 2, m: 8, produce: { item: 'ore', chances: [[0,20],[1,75],[2,5]], special: { item: 'gem', chance: 5 } } },
-      { c: 2, m: 9, produce: { item: 'ore', chances: [[0,10],[1,80],[2,10]], special: { item: 'gem', chance: 10 } } },
-      { c: 3, m: 9, produce: { item: 'ore', chances: [[0,5],[1,80],[2,15]], special: { item: 'gem', chance: 15 } } }
+      { c: 2, m: 8, produce: { item: 'ore', chances: [[0,20],[1,75],[2,5]], special: { item: 'gem', chance: 6 } } },
+      { c: 2, m: 9, produce: { item: 'ore', chances: [[0,10],[1,80],[2,10]], special: { item: 'gem', chance: 7 } } },
+      { c: 3, m: 9, produce: { item: 'ore', chances: [[0,5],[1,80],[2,15]], special: { item: 'gem', chance: 8 } } },
+      { c: 3, m: 10, produce: { item: 'ore', chances: [[1,75],[2,20],[3,5]], special: { item: 'gem', chance: 9 } } },
+      { c: 4, m: 10, produce: { item: 'ore', chances: [[1,70],[2,25],[3,5]], special: { item: 'gem', chance: 10 } } },
+      { c: 4, m: 11, produce: { item: 'ore', chances: [[1,65],[2,25],[3,10]], special: { item: 'gem', chance: 11 } } },
+      { c: 5, m: 11, produce: { item: 'ore', chances: [[1,60],[2,30],[3,10]], special: { item: 'gem', chance: 12 } } },
+      { c: 5, m: 12, produce: { item: 'ore', chances: [[1,55],[2,35],[3,10]], special: { item: 'gem', chance: 13 } } },
+      { c: 6, m: 12, produce: { item: 'ore', chances: [[1,50],[2,40],[3,10]], special: { item: 'gem', chance: 15 } } }
     ],
     requires: 'mountain'
   }
@@ -581,7 +654,7 @@ const EVENTS = [
 ];
 
 // XP required for each level
-const XP_LEVELS = [0, 100, 250, 500, 800, 1200];
+const XP_LEVELS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 3800, 4700, 5700, 6800];
 
 // Vowels and consonants for name generation
 const VOWELS = ['a', 'e', 'i', 'o', 'u'];
@@ -2046,7 +2119,7 @@ async function handleSailCommand(message, args) {
 async function handleItemCommand(message, args) {
   try {
     const player = await Player.findByPk(message.author.id, {
-      include: [Inventory]
+      include: [Unit, Inventory]
     });
     if (!player) return message.reply('Use !setup first');
 
@@ -2054,57 +2127,76 @@ async function handleItemCommand(message, args) {
     if (!itemType) return message.reply('Specify an item to use (medicine, tea, art, trinket)');
 
     if (itemType === 'medicine') {
-      const medicine = player.Inventories.find(i => i.itemType === 'medicine');
-      if (!medicine || medicine.quantity < 1) {
-        return message.reply("You don't have any medicine to use");
-      }
+    const medicine = player.Inventories.find(i => i.itemType === 'medicine');
+    if (!medicine || medicine.quantity < 1) {
+      return message.reply("You don't have any medicine to use");
+    }
 
-      // Show unit list with current/max combat
-      let unitList = player.Units.map((unit, index) => {
-        const maxCombat = SKILLS[unit.type]?.levels[player[`${unit.type.toLowerCase()}Level`] - 1]?.c || 0;
-        return `${index + 1}. ${unit.name} (${unit.type}) - Combat: ${unit.combat.toFixed(2)}/${maxCombat}`;
-      }).join('\n');
+    const quantity = Math.min(parseInt(args[1]) || 1, medicine.quantity);
+    if (quantity > 5) return message.reply("You can use maximum 5 medicine at once");
 
-      const prompt = await message.reply(
-        `Which unit would you like to heal?\n${unitList}\n\nReply with the unit number or "cancel"`
-      );
+    const medicLevel = player.medicLevel;
+    const healPower = SKILLS.Medic.levels[medicLevel - 1].healPower || 1;
+    const totalHeal = quantity * healPower;
 
+    const units = await Unit.findAll({ where: { PlayerId: player.playerId } });
+    const healableUnits = units.map(unit => {
+      const maxCombat = SKILLS[unit.type]?.levels[player[`${unit.type.toLowerCase()}Level`] - 1]?.c || 0;
+      return { unit, maxCombat, healNeeded: maxCombat - unit.combat };
+    }).filter(u => u.healNeeded > 0);
+
+    if (healableUnits.length === 0) {
+      return message.reply('No units need healing right now');
+    }
+
+    // Create selection embed
+    const embed = new EmbedBuilder()
+      .setTitle('Select Unit to Heal')
+      .setDescription(`Total healing power: ${totalHeal.toFixed(1)}`)
+      .addFields(
+        healableUnits.map((u, i) => ({
+          name: `${i + 1}. ${u.unit.name} (${u.unit.type})`,
+          value: `${u.unit.combat.toFixed(2)}/${u.maxCombat} (Can heal ${Math.min(totalHeal, u.healNeeded).toFixed(1)})`,
+          inline: true
+        }))
+      .setFooter({ text: 'Reply with unit number or "cancel"' });
+
+    const prompt = await message.reply({ embeds: [embed] });
+
+    try {
       const filter = m => m.author.id === message.author.id;
-      const collected = await message.channel.awaitMessages({
-        filter,
-        max: 1,
-        time: 30000,
-        errors: ['time']
-      });
-
+      const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30000 });
       const response = collected.first().content.toLowerCase();
+      
       if (response === 'cancel') return message.reply('Medicine use canceled.');
 
       const choice = parseInt(response) - 1;
-      if (isNaN(choice) || choice < 0 || choice >= player.Units.length) {
+      if (isNaN(choice) return message.reply('Please enter a valid number');
+      if (choice < 0 || choice >= healableUnits.length) {
         return message.reply('Invalid unit selection.');
       }
 
-      const unit = player.Units[choice];
-      const maxCombat = SKILLS[unit.type]?.levels[player[`${unit.type.toLowerCase()}Level`] - 1]?.c || 0;
+      const { unit, maxCombat, healNeeded } = healableUnits[choice];
+      const actualHeal = Math.min(totalHeal, healNeeded);
+      const newCombat = Math.min(maxCombat, unit.combat + actualHeal);
       
-      if (unit.combat >= maxCombat) {
-        return message.reply(`This unit is already at maximum combat (${maxCombat}) for their skill level.`);
-      }
+      await unit.update({ combat: newCombat });
+      await removeFromInventory(player.playerId, 'medicine', quantity);
 
-      const newCombat = Math.min(maxCombat, unit.combat + 1);
-      const healedAmount = newCombat - unit.combat;
+      const resultEmbed = new EmbedBuilder()
+        .setTitle('Treatment Complete')
+        .setDescription(`Used ${quantity} medicine on ${unit.name}`)
+        .addFields(
+          { name: 'Healed', value: `+${actualHeal.toFixed(2)} combat`, inline: true },
+          { name: 'New Stats', value: `${newCombat.toFixed(2)}/${maxCombat}`, inline: true }
+        )
+        .setColor('#00FF00');
       
-      if (healedAmount <= 0) {
-        return message.reply('This unit cannot be healed further.');
-      }
-
-      unit.combat = newCombat;
-      await unit.save();
-      await removeFromInventory(player.playerId, 'medicine', 1);
-      
-      return message.reply(`Healed ${unit.name} (+${healedAmount.toFixed(2)} combat)! Their combat is now ${unit.combat.toFixed(2)}/${maxCombat}`);
+      return message.reply({ embeds: [resultEmbed] });
+    } catch (err) {
+      return message.reply('Medicine selection timed out.');
     }
+  }
 
     else if (itemType === 'tea') {
       const tea = player.Inventories.find(i => i.itemType === 'tea');
@@ -2762,55 +2854,83 @@ async function handleAttackCommand(message, args) {
 
 async function handleRogueCommand(message, args) {
   const subCommand = args[0]?.toLowerCase();
-  const player = await Player.findByPk(message.author.id, {
-    include: [Unit]
-  });
+  const player = await Player.findByPk(message.author.id, { include: [Unit] });
+  if (!player) return message.reply('Use !setup first');
 
   if (!subCommand || !['infiltrate', 'heist'].includes(subCommand)) {
-    return message.reply('Usage: `!rogue infiltrate <unitName> <playerId>` OR `!rogue heist <unitName>`');
+    return message.reply('Usage: `!rogue infiltrate <unitName> <playerName>` OR `!rogue heist <unitName>`');
   }
 
-  const unitName = args.slice(1, -1).join(' ');
-  const rogue = player.Units.find(u => 
-    u.type === 'Rogue' && 
-    u.name.toLowerCase() === unitName.toLowerCase()
-  );
-
+  // Find rogue unit
+  const unitName = subCommand === 'heist' ? args.slice(1).join(' ') : args.slice(1, -1).join(' ');
+  const rogue = player.Units.find(u => u.type === 'Rogue' && u.name.toLowerCase() === unitName.toLowerCase());
   if (!rogue) return message.reply('Rogue not found');
   if (rogue.isTraveling) return message.reply('Rogue is currently moving');
 
-  const rogueLevel = SKILLS.Rogue.levels[player.rogueLevel - 1];
+  const rogueLevel = player.rogueLevel;
+  const levelData = SKILLS.Rogue.levels[rogueLevel - 1];
 
   if (subCommand === 'infiltrate') {
-    const targetId = args[args.length - 1];
-    const target = await Player.findByPk(targetId);
-    if (!target) return message.reply('Target kingdom not found');
+    const targetName = args[args.length - 1];
+    if (!targetName) return message.reply('Specify target player name');
+
+    // Find target player by username
+    const targetPlayer = await Player.findOne({ 
+      where: { 
+        username: { [Op.iLike]: targetName } 
+      } 
+    });
+    if (!targetPlayer) return message.reply('Target kingdom not found');
+    if (targetPlayer.playerId === player.playerId) return message.reply("You can't infiltrate yourself!");
 
     // Infiltration logic
-    const detectionChance = 0.3 - (rogueLevel.stealth * 0.1);
+    const detectionChance = 0.3 - (levelData.stealth * 0.05); // More stealth = lower detection
+    const stolenGold = Math.min(25, Math.floor(targetPlayer.gold * 0.15));
     
     if (Math.random() > detectionChance) {
-      const stolenGold = Math.min(15, Math.floor(target.gold * 0.1));
-      await target.update({ gold: target.gold - stolenGold });
+      await targetPlayer.update({ gold: targetPlayer.gold - stolenGold });
       await player.update({ gold: player.gold + stolenGold });
       
-      const targetUser = await bot.users.fetch(targetId);
-      targetUser.send(`💸 A rogue stole ${stolenGold}g from your kingdom!`);
+      // Notify target if possible
+      try {
+        const targetUser = await bot.users.fetch(targetPlayer.playerId);
+        await targetUser.send(`💸 A rogue from ${player.username}'s kingdom stole ${stolenGold}g from you!`);
+      } catch (e) { /* Couldn't DM target */ }
       
-      message.reply(`Your rogue stole ${stolenGold}g successfully!`);
-      await addXP(player.playerId, 'Rogue', 15);
+      const embed = new EmbedBuilder()
+        .setTitle('Infiltration Success')
+        .setDescription(`Your rogue ${rogue.name} stole ${stolenGold}g from ${targetPlayer.username}!`)
+        .addFields(
+          { name: 'Stealth', value: `Detection chance was ${(detectionChance*100).toFixed(1)}%`, inline: true },
+          { name: 'New Gold', value: `${player.gold + stolenGold}g`, inline: true }
+        )
+        .setColor('#00FF00');
+      
+      await message.reply({ embeds: [embed] });
+      await addXP(player.playerId, 'Rogue', 20);
     } else {
-      message.reply('Your rogue was caught and killed!');
       await rogue.destroy();
-      const targetUser = await bot.users.fetch(targetId);
-      targetUser.send(`🕵️ A rogue from ${player.username}'s kingdom was caught!`);
+      
+      // Notify target if possible
+      try {
+        const targetUser = await bot.users.fetch(targetPlayer.playerId);
+        await targetUser.send(`🕵️ Caught ${player.username}'s rogue trying to steal from you!`);
+      } catch (e) { /* Couldn't DM target */ }
+      
+      const embed = new EmbedBuilder()
+        .setTitle('Infiltration Failed')
+        .setDescription(`Your rogue ${rogue.name} was caught and executed!`)
+        .setColor('#FF0000');
+      
+      await message.reply({ embeds: [embed] });
     }
   } 
   else if (subCommand === 'heist') {
-    // Bank heist logic
-    const successChance = rogueLevel.bankTheftChance - 0.05;
+    if (player.gold < 50) return message.reply('You need at least 50g to attempt a heist (bribe money)');
+    
+    const successChance = levelData.bankTheftChance;
     const totalBank = await Player.sum('bankGold');
-    const heistAmount = Math.min(50, Math.floor(totalBank * 0.02));
+    const heistAmount = Math.min(100, Math.floor(totalBank * 0.03));
 
     if (Math.random() < successChance) {
       const victims = await Player.findAll({ 
@@ -2821,27 +2941,49 @@ async function handleRogueCommand(message, args) {
       
       let stolenTotal = 0;
       for (const victim of victims) {
-        const stolen = Math.min(heistAmount, Math.floor(victim.bankGold * 0.3));
+        const stolen = Math.min(heistAmount, Math.floor(victim.bankGold * 0.25));
         await victim.update({ bankGold: victim.bankGold - stolen });
         stolenTotal += stolen;
-        const victimUser = await bot.users.fetch(victim.playerId);
-        victimUser.send(`🏦 The kingdom bank was robbed! Lost ${stolen}g from your taxes.`);
+        
+        try {
+          const victimUser = await bot.users.fetch(victim.playerId);
+          await victimUser.send(`🏦 The kingdom bank was robbed! Lost ${stolen}g from your taxes.`);
+        } catch (e) { /* Couldn't DM */ }
       }
       
-      await player.update({ gold: player.gold + stolenTotal });
-      message.reply(`💰 Bank heist successful! Stole ${stolenTotal}g.`);
-      await addXP(player.playerId, 'Rogue', 25);
+      await player.update({ gold: player.gold + stolenTotal - 50 }); // Deduct bribe money
+      
+      const embed = new EmbedBuilder()
+        .setTitle('Bank Heist Successful!')
+        .setDescription(`Your rogue ${rogue.name} stole ${stolenTotal}g from the kingdom bank!`)
+        .addFields(
+          { name: 'Profit', value: `${stolenTotal - 50}g (after 50g bribe)`, inline: true },
+          { name: 'New Gold', value: `${player.gold + stolenTotal - 50}g`, inline: true }
+        )
+        .setColor('#00FF00');
+      
+      await message.reply({ embeds: [embed] });
+      await addXP(player.playerId, 'Rogue', 30);
     } else {
-      message.reply('🚨 Bank heist failed! Rogue executed and 30g fine imposed.');
+      await player.update({ gold: player.gold - 50 }); // Lost bribe money
       await rogue.destroy();
-      await player.update({ gold: Math.max(0, player.gold - 30) });
       
       const announcementChannel = bot.channels.cache.get(process.env.ANNOUNCEMENT_CHANNEL);
       if (announcementChannel) {
         announcementChannel.send(
-          `⚖️ ${player.username}'s rogue was executed for bank robbery! 30g fine imposed.`
+          `🚨 ${player.username}'s rogue ${rogue.name} was caught attempting a bank heist! 50g fine imposed.`
         );
       }
+      
+      const embed = new EmbedBuilder()
+        .setTitle('Heist Failed!')
+        .setDescription(`Your rogue ${rogue.name} was caught and executed!`)
+        .addFields(
+          { name: 'Fine', value: '50g lost', inline: true }
+        )
+        .setColor('#FF0000');
+      
+      await message.reply({ embeds: [embed] });
     }
   }
 }
