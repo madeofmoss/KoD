@@ -2171,7 +2171,7 @@ async function handleItemCommand(message, args) {
       if (response === 'cancel') return message.reply('Medicine use canceled.');
 
       const choice = parseInt(response) - 1;
-      if (isNaN(choice) return message.reply('Please enter a valid number');
+      if (isNaN(choice)) return message.reply('Please enter a valid number');
       if (choice < 0 || choice >= healableUnits.length) {
         return message.reply('Invalid unit selection.');
       }
