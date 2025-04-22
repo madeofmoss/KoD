@@ -3097,7 +3097,7 @@ async function handleSendCommand(message, args) {
     const itemType = args[1].toLowerCase();
     const amount = parseInt(args[2]);
 
-    if (isNaN(amount) return message.reply('Invalid amount');
+    if (isNaN(amount)) return message.reply('Invalid amount');
     if (amount <= 0) return message.reply('Amount must be positive');
 
     // Find recipient
