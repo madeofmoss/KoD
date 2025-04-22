@@ -29,7 +29,7 @@ const RACES = {
   Elf: { 
     bonus: '+1 Architect XP gain', 
     effect: 'Units have +1c on forest spaces',
-    xpBonus: { Architect: 1 } // +1 XP when gaining Architect XP
+    xpBonus: { Architect: 1 }
   },
   Dwarf: { 
     bonus: '+1 Smith & +1 Miner XP gain', 
@@ -43,15 +43,11 @@ const RACES = {
   },
   Draconian: { 
     bonus: '+40 starting gold', 
-    effect: 'None',
-    // No XP bonus
+    effect: 'None'
   },
   Goblin: { 
     bonus: 'None', 
-    effect: 'Units have -1c, Population doesn\'t decrease until food is 4 less',
-    applyBonus: async (player) => {
-      // Effect is handled in daily update
-    }
+    effect: 'Units have -1c, Population doesn\'t decrease until food is 4 less'
   },
   Orc: { 
     bonus: '+1 Warrior & +1 Smith XP gain', 
@@ -60,10 +56,7 @@ const RACES = {
   },
   Merfolk: { 
     bonus: 'None', 
-    effect: '+1c on water, Water movement costs 2m',
-    applyBonus: async (player) => {
-      // Effect is handled in movement and combat
-    }
+    effect: '+1c on water, Water movement costs 2m'
   },
   Treefolk: { 
     bonus: '+1 Architect XP gain', 
@@ -72,17 +65,11 @@ const RACES = {
   },
   Xathri: { 
     bonus: 'None', 
-    effect: '+1m in forest, Population doesn\'t decrease until food is 2 less',
-    applyBonus: async (player) => {
-      // Effect is handled in daily update and movement
-    }
+    effect: '+1m in forest, Population doesn\'t decrease until food is 2 less'
   },
   Vampirian: { 
     bonus: 'None', 
-    effect: 'Units gain +1 food when killing another unit',
-    applyBonus: async (player) => {
-      // Effect is handled in combat
-    }
+    effect: 'Units gain +1 food when killing another unit'
   },
   DarkElf: { 
     bonus: '+1 Medic XP gain', 
@@ -90,21 +77,19 @@ const RACES = {
     xpBonus: { Medic: 1 }
   },
   Hobbit: { 
-    bonus: '+1 Farmer & +1 Rogue XP Gain', 
+    bonus: '+1 Farmer & +1 Rogue XP gain', 
     effect: 'None',
     xpBonus: { Farmer: 1, Rogue: 1 }
   },
   Kappa: { 
     bonus: 'None', 
-    effect: '+1c when attacked, Water movement costs 2m',
-    applyBonus: async (player) => {
-      // Effect is handled in combat and movement
-    }
+    effect: '+1c when attacked, Water movement costs 2m'
   },
   Avian: { 
-    bonus: '+1 Architect level', 
+    bonus: '+1 Architect XP gain', 
     effect: 'Mountain movement costs 2m',
     xpBonus: { Architect: 1 }
+  }
 };
 
 const SKILLS = {
