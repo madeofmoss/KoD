@@ -841,17 +841,20 @@ function generateUnitName() {
 // Movement System
 // =================
 async function processMovement() {
-  try {
-    const travelingUnits = await Unit.findAll({ 
-      where: { 
-        [Op.or]: [
-          { isTraveling: true },
-          { wanderingSpaces: { [Op.gt]: 0 } },
-          { sailingSpaces: { [Op.gt]: 0 } }
-        ]
-      },
-      include: [Player]
-    });
+    const t = await sequelize.transaction();
+    try {
+        const travelingUnits = await Unit.findAll({ 
+            where: { 
+                [Op.or]: [
+                    { isTraveling: true },
+                    { wanderingSpaces: { [Op.gt]: 0 } },
+                    { sailingSpaces: { [Op.gt]: 0 } }
+                ]
+            },
+            include: [Player],
+            transaction: t
+        });
+
 
     for (const unit of travelingUnits) {
       if (unit.isTraveling) {
@@ -992,9 +995,11 @@ async function processMovement() {
         await unit.save();
       }
     }
-  } catch (error) {
-    console.error('Movement processing error:', error);
-  }
+        await t.commit();
+    } catch (error) {
+        await t.rollback();
+        console.error('Movement processing error:', error);
+    }
 }
 
 function getUnitMaxCombat(unit, player) {
@@ -1077,7 +1082,7 @@ async function addXP(playerId, skill, amount) {
   player[xpField] += amount;
   
   // Check if skill should level up
-  if (player[levelField] < 6 && player[xpField] >= XP_LEVELS[player[levelField]]) {
+  if (player[levelField] < 12 && player[xpField] >= XP_LEVELS[player[levelField]]) {
     player[levelField] += 1;
     player[xpField] = 0;
     
@@ -2117,86 +2122,87 @@ async function handleSailCommand(message, args) {
 // Item Commands
 // =================
 async function handleItemCommand(message, args) {
-  try {
-    const player = await Player.findByPk(message.author.id, {
-      include: [Unit, Inventory]
-    });
-    if (!player) return message.reply('Use !setup first');
-
-    const itemType = args[0]?.toLowerCase();
-    if (!itemType) return message.reply('Specify an item to use (medicine, tea, art, trinket)');
-
-    if (itemType === 'medicine') {
-    const medicine = player.Inventories.find(i => i.itemType === 'medicine');
-    if (!medicine || medicine.quantity < 1) {
-      return message.reply("You don't have any medicine to use");
-    }
-
-    const quantity = Math.min(parseInt(args[1]) || 1, medicine.quantity);
-    if (quantity > 5) return message.reply("You can use maximum 5 medicine at once");
-
-    const medicLevel = player.medicLevel;
-    const healPower = SKILLS.Medic.levels[medicLevel - 1].healPower || 1;
-    const totalHeal = quantity * healPower;
-
-    const units = await Unit.findAll({ where: { PlayerId: player.playerId } });
-    const healableUnits = units.map(unit => {
-      const maxCombat = SKILLS[unit.type]?.levels[player[`${unit.type.toLowerCase()}Level`] - 1]?.c || 0;
-      return { unit, maxCombat, healNeeded: maxCombat - unit.combat };
-    }).filter(u => u.healNeeded > 0);
-
-    if (healableUnits.length === 0) {
-      return message.reply('No units need healing right now');
-    }
-
-    // Create selection embed
-    const embed = new EmbedBuilder()
-      .setTitle('Select Unit to Heal')
-      .setDescription(`Total healing power: ${totalHeal.toFixed(1)}`)
-      .addFields(
-        healableUnits.map((u, i) => ({
-          name: `${i + 1}. ${u.unit.name} (${u.unit.type})`,
-          value: `${u.unit.combat.toFixed(2)}/${u.maxCombat} (Can heal ${Math.min(totalHeal, u.healNeeded).toFixed(1)})`,
-          inline: true
-        }))
-      .setFooter({ text: 'Reply with unit number or "cancel"' });
-
-    const prompt = await message.reply({ embeds: [embed] });
-
     try {
-      const filter = m => m.author.id === message.author.id;
-      const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30000 });
-      const response = collected.first().content.toLowerCase();
-      
-      if (response === 'cancel') return message.reply('Medicine use canceled.');
+        const player = await Player.findByPk(message.author.id, {
+            include: [Unit, Inventory]
+        });
+        if (!player) return message.reply('Use !setup first');
 
-      const choice = parseInt(response) - 1;
-      if (isNaN(choice)) return message.reply('Please enter a valid number');
-      if (choice < 0 || choice >= healableUnits.length) {
-        return message.reply('Invalid unit selection.');
-      }
+        const itemType = args[0]?.toLowerCase();
+        if (!itemType) return message.reply('Specify an item to use (medicine, tea, art, trinket)');
 
-      const { unit, maxCombat, healNeeded } = healableUnits[choice];
-      const actualHeal = Math.min(totalHeal, healNeeded);
-      const newCombat = Math.min(maxCombat, unit.combat + actualHeal);
-      
-      await unit.update({ combat: newCombat });
-      await removeFromInventory(player.playerId, 'medicine', quantity);
+        if (itemType === 'medicine') {
+            const medicine = player.Inventories.find(i => i.itemType === 'medicine');
+            if (!medicine || medicine.quantity < 1) {
+                return message.reply("You don't have any medicine to use");
+            }
 
-      const resultEmbed = new EmbedBuilder()
-        .setTitle('Treatment Complete')
-        .setDescription(`Used ${quantity} medicine on ${unit.name}`)
-        .addFields(
-          { name: 'Healed', value: `+${actualHeal.toFixed(2)} combat`, inline: true },
-          { name: 'New Stats', value: `${newCombat.toFixed(2)}/${maxCombat}`, inline: true }
-        )
-        .setColor('#00FF00');
-      
-      return message.reply({ embeds: [resultEmbed] });
-    } catch (err) {
-      return message.reply('Medicine selection timed out.');
-    }
-  }
+            const quantity = Math.min(parseInt(args[1]) || 1, medicine.quantity);
+            if (quantity > 5) return message.reply("You can use maximum 5 medicine at once");
+
+            const medicLevel = player.medicLevel;
+            const healPower = SKILLS.Medic.levels[medicLevel - 1].healPower || 1;
+            const totalHeal = quantity * healPower;
+
+            const units = await Unit.findAll({ where: { PlayerId: player.playerId } });
+            const healableUnits = units.map(unit => {
+                const maxCombat = getUnitMaxCombat(unit, player);
+                return { unit, maxCombat, healNeeded: maxCombat - unit.combat };
+            }).filter(u => u.healNeeded > 0);
+
+            if (healableUnits.length === 0) {
+                return message.reply('No units need healing right now');
+            }
+
+            // Create selection embed
+            const embed = new EmbedBuilder()
+                .setTitle('Select Unit to Heal')
+                .setDescription(`Total healing power: ${totalHeal.toFixed(1)}`)
+                .addFields(
+                    healableUnits.map((u, i) => ({
+                        name: `${i + 1}. ${u.unit.name} (${u.unit.type})`,
+                        value: `${u.unit.combat.toFixed(2)}/${u.maxCombat} (Can heal ${Math.min(totalHeal, u.healNeeded).toFixed(1)})`,
+                        inline: true
+                    }))
+                )
+                .setFooter({ text: 'Reply with unit number or "cancel"' });
+
+            const prompt = await message.reply({ embeds: [embed] });
+
+            try {
+                const filter = m => m.author.id === message.author.id;
+                const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30000 });
+                const response = collected.first().content.toLowerCase();
+                
+                if (response === 'cancel') return message.reply('Medicine use canceled.');
+
+                const choice = parseInt(response) - 1;
+                if (isNaN(choice)) return message.reply('Please enter a valid number');
+                if (choice < 0 || choice >= healableUnits.length) {
+                    return message.reply('Invalid unit selection.');
+                }
+
+                const { unit, maxCombat, healNeeded } = healableUnits[choice];
+                const actualHeal = Math.min(totalHeal, healNeeded);
+                const newCombat = Math.min(maxCombat, unit.combat + actualHeal);
+                
+                await unit.update({ combat: newCombat });
+                await removeFromInventory(player.playerId, 'medicine', quantity);
+
+                const resultEmbed = new EmbedBuilder()
+                    .setTitle('Treatment Complete')
+                    .setDescription(`Used ${quantity} medicine on ${unit.name}`)
+                    .addFields(
+                        { name: 'Healed', value: `+${actualHeal.toFixed(2)} combat`, inline: true },
+                        { name: 'New Stats', value: `${newCombat.toFixed(2)}/${maxCombat}`, inline: true }
+                    )
+                    .setColor('#00FF00');
+                
+                return message.reply({ embeds: [resultEmbed] });
+            } catch (err) {
+                return message.reply('Medicine selection timed out.');
+            }
+        }
 
     else if (itemType === 'tea') {
       const tea = player.Inventories.find(i => i.itemType === 'tea');
@@ -2438,6 +2444,17 @@ async function addToInventory(playerId, itemType, quantity = 1, value = 0) {
     }
     return;
   }
+    // Weapons/armor should never stack
+    if (itemType === 'weapon' || itemType === 'armor') {
+        await Inventory.create({
+            itemId: `item_${Date.now()}`,
+            PlayerId: playerId,
+            itemType,
+            quantity: 1,
+            value
+        });
+        return;
+    }
 
   const existingItem = await Inventory.findOne({ 
     where: { 
@@ -2460,6 +2477,16 @@ async function addToInventory(playerId, itemType, quantity = 1, value = 0) {
       value
     });
   }
+}
+
+function getMarketPrice(item, player) {
+    if (!MARKET_PRICES[item]) return null;
+    
+    if (typeof MARKET_PRICES[item].buy === 'function') {
+        const avgLevel = await getAverageSkillLevel(player);
+        return MARKET_PRICES[item].buy(avgLevel || 1);
+    }
+    return MARKET_PRICES[item].buy;
 }
 
 async function removeFromInventory(playerId, itemType, quantity = 1) {
