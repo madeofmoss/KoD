@@ -1471,30 +1471,42 @@ async function handleDailyUpdate() {
       // Daily production attempts instead of free units
       for (const skill of [player.skill1, player.skill2]) {
         const skillData = SKILLS[skill];
-        if (!skillData) continue;
+        if (!skillData || !skillData.levels || !skillData.levels[0]) continue;
 
+        const levelData = skillData.levels[0];
         let produced = 0;
         let goldEarned = 0;
 
         for (let i = 0; i < 3; i++) { // 3 attempts
-          if (skillData.levels[0].produce) {
+          if (levelData.produce && levelData.produce.chances) {
+            // For producing skills (Farmer, Miner, etc.)
             const roll = Math.random() * 100;
-            for (const [amount, chance] of skillData.levels[0].produce.chances) {
+            for (const [amount, chance] of levelData.produce.chances) {
+              if (roll <= chance) {
+                produced += amount;
+                break;
+              }
+            }
+          } else if (levelData.produce && levelData.produce.item === 'gold') {
+            // For Merchant
+            const roll = Math.random() * 100;
+            for (const [amount, chance] of levelData.produce.chances) {
               if (roll <= chance) {
                 produced += amount;
                 break;
               }
             }
           } else {
+            // For non-producing skills (Warrior, etc.)
             goldEarned += 5; // 5g per attempt for non-producing skills
           }
         }
 
         if (produced > 0) {
-          if (skillData.levels[0].produce.item === 'gold') {
+          if (levelData.produce && levelData.produce.item === 'gold') {
             await player.update({ gold: player.gold + produced });
-          } else {
-            await addToInventory(player.playerId, skillData.levels[0].produce.item, produced);
+          } else if (levelData.produce && levelData.produce.item) {
+            await addToInventory(player.playerId, levelData.produce.item, produced);
           }
         }
         if (goldEarned > 0) {
