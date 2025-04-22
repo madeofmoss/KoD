@@ -878,10 +878,7 @@ async function processMovement() {
           
           // Notify player
           if (player) {
-            const user = await bot.users.fetch(player.playerId);
-            if (user) {
-              user.send(`Your ${unit.type} has arrived at ${unit.position}!`);
-            }
+            message.channel.send(`Your ${unit.type} has arrived at ${unit.position}!`);
           }
         } else {
           // Still traveling
@@ -917,15 +914,11 @@ async function processMovement() {
               await Player.update({ gold: player.gold + reward }, { where: { playerId: unit.PlayerId } });
               
               const user = await bot.users.fetch(unit.PlayerId);
-              if (user) {
-                user.send(`Your ${unit.type} defeated a CR ${monsterCR} monster and earned ${reward}g!`);
-              }
-            } else {
-              // Unit defeated
-              const user = await bot.users.fetch(unit.PlayerId);
-              if (user) {
-                user.send(`Your ${unit.type} was defeated by a CR ${monsterCR} monster while wandering!`);
-              }
+              if (combatResult.victory) {
+  message.reply(`Your ${unit.type} defeated a CR ${monsterCR} monster and earned ${reward}g!`);
+} else {
+  message.reply(`Your ${unit.type} was defeated by a CR ${monsterCR} monster while wandering!`);
+}
               await unit.destroy();
               continue; // Skip saving since unit is destroyed
             }
@@ -955,7 +948,7 @@ async function processMovement() {
               await addToInventory(unit.PlayerId, 'food', 1);
               const user = await bot.users.fetch(unit.PlayerId);
               if (user) {
-                user.send(`Your ${unit.type} found 1 food while sailing!`);
+                message.reply(`Your ${unit.type} found 1 food while sailing!`);
               }
             }
           }
@@ -966,7 +959,7 @@ async function processMovement() {
               await addToInventory(unit.PlayerId, 'gem', 1);
               const user = await bot.users.fetch(unit.PlayerId);
               if (user) {
-                user.send(`Your ${unit.type} found 1 gem while sailing!`);
+                message.reply(`Your ${unit.type} found 1 gem while sailing!`);
               }
             }
           }
@@ -979,13 +972,13 @@ async function processMovement() {
             if (combatResult.victory) {
               const user = await bot.users.fetch(unit.PlayerId);
               if (user) {
-                user.send(`Your ${unit.type} defeated pirate attackers (CR ${pirateCR}) while sailing!`);
+                message.reply(`Your ${unit.type} defeated pirate attackers (CR ${pirateCR}) while sailing!`);
               }
             } else {
               // Unit defeated
               const user = await bot.users.fetch(unit.PlayerId);
               if (user) {
-                user.send(`Your ${unit.type} was defeated by pirates (CR ${pirateCR}) while sailing!`);
+                message.reply(`Your ${unit.type} was defeated by pirates (CR ${pirateCR}) while sailing!`);
               }
               await unit.destroy();
               continue; // Skip saving since unit is destroyed
@@ -1091,7 +1084,7 @@ async function addXP(playerId, skill, amount) {
     // Notify player
     const user = await bot.users.fetch(playerId);
     if (user) {
-      user.send(`🥳 Level Up! Your ${skill} is now level ${player[levelField]} 📈`);
+      message.reply(`🥳 Level Up! Your ${skill} is now level ${player[levelField]} 📈`);
     }
     
     return true; // Leveled up
@@ -2933,7 +2926,7 @@ async function handleRogueCommand(message, args) {
       // Notify target if possible
       try {
         const targetUser = await bot.users.fetch(targetPlayer.playerId);
-        await targetUser.send(`💸 A rogue from ${player.username}'s kingdom stole ${stolenGold}g from you!`);
+        await targetUser.send(`💸 A rogue stole ${stolenGold}g from you!`);
       } catch (e) { /* Couldn't DM target */ }
       
       const embed = new EmbedBuilder()
@@ -2986,7 +2979,7 @@ async function handleRogueCommand(message, args) {
         
         try {
           const victimUser = await bot.users.fetch(victim.playerId);
-          await victimUser.send(`🏦 The kingdom bank was robbed! Lost ${stolen}g from your taxes.`);
+          await victimmessage.reply(`🏦 The kingdom bank was robbed! Lost ${stolen}g from your taxes.`);
         } catch (e) { /* Couldn't DM */ }
       }
       
