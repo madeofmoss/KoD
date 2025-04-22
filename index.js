@@ -1075,12 +1075,13 @@ async function handleSetupCommand(message) {
     }
 
     const gold = 80 + (playerCount * 10) + Math.floor(Math.random() * 41);
-    const distanceToMarket = 8 + Math.floor(Math.random() * 5); // 8-12
-    const distanceToMountain = 5 + Math.floor(Math.random() * 6); // 5-10
-    const distanceToForest = 3 + Math.floor(Math.random() * 5); // 3-7
-    const distanceToCoast = 6 + Math.floor(Math.random() * 5); // 6-10
+    const distanceToMarket = 8 + Math.floor(Math.random() * 5);
+    const distanceToMountain = 5 + Math.floor(Math.random() * 6);
+    const distanceToForest = 3 + Math.floor(Math.random() * 5);
+    const distanceToCoast = 6 + Math.floor(Math.random() * 5);
 
-    const player = await Player.create({
+    // Create player (removed duplicate declaration)
+    const newPlayer = await Player.create({
       playerId: message.author.id,
       username: message.author.username,
       race,
@@ -1094,21 +1095,7 @@ async function handleSetupCommand(message) {
       turnOrder: playerCount + 1
     });
 
-    // Apply race bonuses
-    const player = await Player.create({
-      playerId: message.author.id,
-      username: message.author.username,
-      race,
-      skill1,
-      skill2,
-      gold,
-      distanceToMarket,
-      distanceToMountain,
-      distanceToForest,
-      distanceToCoast,
-      turnOrder: playerCount + 1
-    });
-
+    // Create starting units
     await createUnit(message.author.id, skill1);
     await createUnit(message.author.id, skill2);
 
