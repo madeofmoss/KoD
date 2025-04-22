@@ -277,7 +277,7 @@ const SKILLS = {
     ]
   },
   Smith: {
-    emoji: '⚒',
+    emoji: '⚒️',
     levels: [
       { c: 1, m: 4, produce: { item: 'weapon', minValue: 0.8, maxValue: 1.2, successRate: 60 } },
       { c: 1, m: 5, produce: { item: 'weapon', minValue: 1.8, maxValue: 2.2, successRate: 70 } },
@@ -328,7 +328,7 @@ const SKILLS = {
     ]
   },
   Miner: {
-    emoji: '⛏',
+    emoji: '⛏️',
     levels: [
       { c: 1, m: 6, produce: { item: 'ore', chances: [[0,50],[1,45],[2,5]], special: { item: 'gem', chance: 5 } } },
       { c: 1, m: 6, produce: { item: 'ore', chances: [[0,40],[1,55],[2,5]], special: { item: 'gem', chance: 5 } } },
@@ -1436,7 +1436,9 @@ async function handleLevelsCommand(message) {
 
 async function handleDailyUpdate() {
   try {
-    const players = await Player.findAll();
+    const players = await Player.findAll({
+      include: [Unit, Structure, Inventory]
+    });
     const date = getCurrentDate();
     const event = getDailyEvent();
 
@@ -1454,14 +1456,41 @@ async function handleDailyUpdate() {
     const bankCut = Math.floor(totalTaxes * 0.1);
     const redistribution = Math.floor((totalTaxes - bankCut) / players.length);
     
-    // Update bank and redistribute
+    // Process each player's daily update
     for (const player of players) {
+      // Check for zero population - kingdom collapse
+      if (player.population <= 0) {
+        // Destroy all units
+        await Unit.destroy({ where: { PlayerId: player.playerId } });
+        
+        // Destroy all structures
+        await Structure.destroy({ where: { PlayerId: player.playerId } });
+        
+        // Reset to minimum population with basic resources
+        await player.update({ 
+          population: 1,
+          food: 1,
+          gold: 20,
+          mood: 3
+        });
+        
+        // Announce the collapse
+        const announcementChannel = bot.channels.cache.get(process.env.ANNOUNCEMENT_CHANNEL);
+        if (announcementChannel) {
+          announcementChannel.send(
+            `💀 ${player.username}'s kingdom collapsed from starvation! All units and buildings have been lost.`
+          );
+        }
+        continue; // Skip rest of daily update for this player
+      }
+
+      // Normal daily update for surviving kingdoms
       await player.update({
         gold: player.gold + redistribution,
         bankGold: player.bankGold + bankCut
       });
 
-      // Daily production attempts instead of free units
+      // Daily production attempts
       for (const skill of [player.skill1, player.skill2]) {
         const skillData = SKILLS[skill];
         if (!skillData || !skillData.levels || !skillData.levels[0]) continue;
@@ -1472,7 +1501,6 @@ async function handleDailyUpdate() {
 
         for (let i = 0; i < 3; i++) { // 3 attempts
           if (levelData.produce && levelData.produce.chances) {
-            // For producing skills (Farmer, Miner, etc.)
             const roll = Math.random() * 100;
             for (const [amount, chance] of levelData.produce.chances) {
               if (roll <= chance) {
@@ -1481,7 +1509,6 @@ async function handleDailyUpdate() {
               }
             }
           } else if (levelData.produce && levelData.produce.item === 'gold') {
-            // For Merchant
             const roll = Math.random() * 100;
             for (const [amount, chance] of levelData.produce.chances) {
               if (roll <= chance) {
@@ -1490,7 +1517,6 @@ async function handleDailyUpdate() {
               }
             }
           } else {
-            // For non-producing skills (Warrior, etc.)
             goldEarned += 5; // 5g per attempt for non-producing skills
           }
         }
@@ -1511,12 +1537,12 @@ async function handleDailyUpdate() {
       let populationChange = 0;
       if (player.race === 'Goblin') {
         if (player.mood === 5) populationChange += 1;
-        if (player.food > player.population - 4) populationChange += 1;
+        if (player.food > player.population) populationChange += 1;
         if (player.mood === 1) populationChange -= 1;
         if (player.population > player.food + 4) populationChange -= 1;
       } else if (player.race === 'Xathri') {
         if (player.mood === 5) populationChange += 1;
-        if (player.food > player.population - 2) populationChange += 1;
+        if (player.food > player.population) populationChange += 1;
         if (player.mood === 1) populationChange -= 1;
         if (player.population > player.food + 2) populationChange -= 1;
       } else {
@@ -1526,13 +1552,24 @@ async function handleDailyUpdate() {
         if (player.population > player.food) populationChange -= 1;
       }
 
+      // Apply population changes
+      const newPopulation = Math.max(0, player.population + populationChange);
       await player.update({
-        population: Math.max(0, player.population + populationChange),
+        population: newPopulation,
         food: Math.max(0, player.food - player.population)
       });
+
+      // Check for mood effects from buildings
+      const moodBuildings = player.Structures.filter(s => s.type === 'mood');
+      if (moodBuildings.length > 0) {
+        const moodBonus = moodBuildings.length * 0.5;
+        await player.update({
+          mood: Math.min(5, player.mood + moodBonus)
+        });
+      }
     }
 
-    // Announcement
+    // Daily announcement
     const announcementChannel = bot.channels.cache.get(process.env.ANNOUNCEMENT_CHANNEL);
     if (announcementChannel) {
       const embed = new EmbedBuilder()
@@ -1542,7 +1579,7 @@ async function handleDailyUpdate() {
             `Taxes collected and redistributed. Each kingdom received ${redistribution}g.`
           : 'Today\'s event is secret...\n\n' +
             `Taxes collected and redistributed. Each kingdom received ${redistribution}g.`)
-        .setFooter({ text: 'All kingdoms have processed their daily production attempts' });
+        .setFooter({ text: 'All kingdoms have processed their daily updates' });
 
       await announcementChannel.send({ embeds: [embed] });
     }
@@ -3045,6 +3082,100 @@ async function handleResetCommand(message) {
   }
 }
 
+async function handleSendCommand(message, args) {
+  try {
+    const sender = await Player.findByPk(message.author.id, {
+      include: [Inventory]
+    });
+    if (!sender) return message.reply('Use !setup first');
+
+    if (args.length < 3) {
+      return message.reply('Usage: !send <playername> <item|gold|food> <amount>');
+    }
+
+    const recipientName = args[0];
+    const itemType = args[1].toLowerCase();
+    const amount = parseInt(args[2]);
+
+    if (isNaN(amount) return message.reply('Invalid amount');
+    if (amount <= 0) return message.reply('Amount must be positive');
+
+    // Find recipient
+    const recipient = await Player.findOne({
+      where: { username: { [Op.iLike]: recipientName } },
+      include: [Inventory]
+    });
+    if (!recipient) return message.reply('Player not found');
+    if (recipient.playerId === sender.playerId) return message.reply("You can't send to yourself");
+
+    // Handle different resource types
+    if (itemType === 'gold') {
+      if (sender.gold < amount) return message.reply('Not enough gold');
+      await sender.update({ gold: sender.gold - amount });
+      await recipient.update({ gold: recipient.gold + amount });
+    } 
+    else if (itemType === 'food') {
+      if (sender.food < amount) return message.reply('Not enough food');
+      await sender.update({ food: sender.food - amount });
+      await recipient.update({ food: recipient.food + amount });
+    } 
+    else {
+      // Item transfer
+      const senderItem = sender.Inventories.find(i => i.itemType === itemType);
+      if (!senderItem || senderItem.quantity < amount) {
+        return message.reply(`You don't have enough ${itemType}`);
+      }
+
+      await removeFromInventory(sender.playerId, itemType, amount);
+      await addToInventory(recipient.playerId, itemType, amount, senderItem.value);
+    }
+
+    message.reply(`Sent ${amount} ${itemType} to ${recipient.username}`);
+  } catch (error) {
+    console.error('Send error:', error);
+    message.reply('Error processing send command');
+  }
+}
+
+async function handleRequestCommand(message, args) {
+  try {
+    const requester = await Player.findByPk(message.author.id);
+    if (!requester) return message.reply('Use !setup first');
+
+    if (args.length < 3) {
+      return message.reply('Usage: !request <playername> <item|gold|food> <amount>');
+    }
+
+    const targetName = args[0];
+    const itemType = args[1].toLowerCase();
+    const amount = parseInt(args[2]);
+
+    if (isNaN(amount)) return message.reply('Invalid amount');
+    if (amount <= 0) return message.reply('Amount must be positive');
+
+    // Find target player
+    const target = await Player.findOne({
+      where: { username: { [Op.iLike]: targetName } }
+    });
+    if (!target) return message.reply('Player not found');
+    if (target.playerId === requester.playerId) return message.reply("You can't request from yourself");
+
+    // Send the request
+    const announcementChannel = bot.channels.cache.get(process.env.ANNOUNCEMENT_CHANNEL);
+    if (announcementChannel) {
+      announcementChannel.send(
+        `📜 ${requester.username} requests ${amount} ${itemType} from ${target.username}\n` +
+        `To fulfill: !send ${requester.username} ${itemType} ${amount}`
+      );
+    }
+
+    message.reply(`Trade request sent to ${target.username}`);
+  } catch (error) {
+    console.error('Request error:', error);
+    message.reply('Error processing request command');
+  }
+}
+
 // =============
 // Bot Startup
 // =============
@@ -3087,6 +3218,8 @@ bot.on('messageCreate', async message => {
     else if (command === 'attack') await handleAttackCommand(message, args);
     else if (command === 'rogue') await handleRogueCommand(message, args);
     else if (command === 'item') await handleItemCommand(message, args);
+    else if (command === 'send') await handleSendCommand(message, args);
+    else if (command === 'request') await handleRequestCommand(message, args);
     else if (command === 'equip') await handleEquipCommand(message, args);
     else if (command === 'rollall') await handleRollAllCommand(message, args);
     else if (command === 'hotpotato') await handleHotPotatoCommand(message, args);
@@ -3118,6 +3251,8 @@ Available commands:
 !attack <unitName> <unit|kingdom> <targetId> - Attack
 !item <item> - Use an item (trinket, beer_barrel, art, medicine, tea)
 !equip <unitName> <weapon|armor> - Equip items to units
+!send <playername> <item|gold|food> <amount>
+!request <playername> <item|gold|food> <amount>
 !YesIReallyWantToResetMyKingdom - Reset kingdom
       `);
     }
