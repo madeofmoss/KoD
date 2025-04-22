@@ -27,38 +27,24 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
 // =====================
 const RACES = {
   Elf: { 
-    bonus: '+1 Architect level', 
+    bonus: '+1 Architect XP gain', 
     effect: 'Units have +1c on forest spaces',
-    applyBonus: async (player) => {
-      await player.update({ architectLevel: Math.min(6, player.architectLevel + 1) });
-    }
+    xpBonus: { Architect: 1 } // +1 XP when gaining Architect XP
   },
   Dwarf: { 
-    bonus: '+1 Smith & +1 Miner level', 
+    bonus: '+1 Smith & +1 Miner XP gain', 
     effect: 'None',
-    applyBonus: async (player) => {
-      await player.update({ 
-        smithLevel: Math.min(6, player.smithLevel + 1),
-        minerLevel: Math.min(6, player.minerLevel + 1)
-      });
-    }
+    xpBonus: { Smith: 1, Miner: 1 }
   },
   Human: { 
-    bonus: '+1 Inventor & +1 Merchant level', 
+    bonus: '+1 Inventor & +1 Merchant XP gain', 
     effect: 'None',
-    applyBonus: async (player) => {
-      await player.update({ 
-        inventorLevel: Math.min(6, player.inventorLevel + 1),
-        merchantLevel: Math.min(6, player.merchantLevel + 1)
-      });
-    }
+    xpBonus: { Inventor: 1, Merchant: 1 }
   },
   Draconian: { 
     bonus: '+40 starting gold', 
     effect: 'None',
-    applyBonus: async (player) => {
-      await player.update({ gold: player.gold + 40 });
-    }
+    // No XP bonus
   },
   Goblin: { 
     bonus: 'None', 
@@ -68,14 +54,9 @@ const RACES = {
     }
   },
   Orc: { 
-    bonus: '+1 Warrior & +1 Smith level', 
+    bonus: '+1 Warrior & +1 Smith XP gain', 
     effect: 'None',
-    applyBonus: async (player) => {
-      await player.update({ 
-        warriorLevel: Math.min(6, player.warriorLevel + 1),
-        smithLevel: Math.min(6, player.smithLevel + 1)
-      });
-    }
+    xpBonus: { Warrior: 1, Smith: 1 }
   },
   Merfolk: { 
     bonus: 'None', 
@@ -85,11 +66,9 @@ const RACES = {
     }
   },
   Treefolk: { 
-    bonus: '+1 Architect level', 
+    bonus: '+1 Architect XP gain', 
     effect: '+1c on forest spaces',
-    applyBonus: async (player) => {
-      await player.update({ architectLevel: Math.min(6, player.architectLevel + 1) });
-    }
+    xpBonus: { Architect: 1 }
   },
   Xathri: { 
     bonus: 'None', 
@@ -106,21 +85,14 @@ const RACES = {
     }
   },
   DarkElf: { 
-    bonus: '+1 Medic level', 
+    bonus: '+1 Medic XP gain', 
     effect: '+1c on forest spaces',
-    applyBonus: async (player) => {
-      await player.update({ medicLevel: Math.min(6, player.medicLevel + 1) });
-    }
+    xpBonus: { Medic: 1 }
   },
   Hobbit: { 
-    bonus: '+1 Farmer & +1 Rogue level', 
+    bonus: '+1 Farmer & +1 Rogue XP Gain', 
     effect: 'None',
-    applyBonus: async (player) => {
-      await player.update({ 
-        farmerLevel: Math.min(6, player.farmerLevel + 1),
-        rogueLevel: Math.min(6, player.rogueLevel + 1)
-      });
-    }
+    xpBonus: { Farmer: 1, Rogue: 1 }
   },
   Kappa: { 
     bonus: 'None', 
@@ -132,10 +104,7 @@ const RACES = {
   Avian: { 
     bonus: '+1 Architect level', 
     effect: 'Mountain movement costs 2m',
-    applyBonus: async (player) => {
-      await player.update({ architectLevel: Math.min(6, player.architectLevel + 1) });
-    }
-  }
+    xpBonus: { Architect: 1 }
 };
 
 const SKILLS = {
@@ -1065,14 +1034,23 @@ function getMovementCost(from, to, unitType, race) {
 // =================
 // XP System (now kingdom-wide)
 // =================
-async function addXP(playerId, skill, amount) {
+async function addXP(playerId, skill, baseAmount) {
   const player = await Player.findByPk(playerId);
   if (!player) return false;
+  
+  // Get racial XP bonus if any
+  const raceData = RACES[player.race];
+  let xpBonus = 0;
+  if (raceData?.xpBonus?.[skill]) {
+    xpBonus = raceData.xpBonus[skill];
+  }
+  
+  const totalXP = baseAmount + xpBonus;
   
   const xpField = `${skill.toLowerCase()}Xp`;
   const levelField = `${skill.toLowerCase()}Level`;
   
-  player[xpField] += amount;
+  player[xpField] += totalXP;
   
   // Check if skill should level up
   if (player[levelField] < 12 && player[xpField] >= XP_LEVELS[player[levelField]]) {
