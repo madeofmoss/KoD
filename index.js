@@ -2479,7 +2479,7 @@ async function addToInventory(playerId, itemType, quantity = 1, value = 0) {
   }
 }
 
-function getMarketPrice(item, player) {
+async function getMarketPrice(item, player) {
     if (!MARKET_PRICES[item]) return null;
     
     if (typeof MARKET_PRICES[item].buy === 'function') {
