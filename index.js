@@ -1110,7 +1110,19 @@ async function handleSetupCommand(message) {
     });
 
     // Apply race bonuses
-    await RACES[race].applyBonus(player);
+    const player = await Player.create({
+      playerId: message.author.id,
+      username: message.author.username,
+      race,
+      skill1,
+      skill2,
+      gold,
+      distanceToMarket,
+      distanceToMountain,
+      distanceToForest,
+      distanceToCoast,
+      turnOrder: playerCount + 1
+    });
 
     await createUnit(message.author.id, skill1);
     await createUnit(message.author.id, skill2);
